@@ -8,7 +8,7 @@ Features
 
 * Only 1 dependency (doT)
 * Extremely fast ([all the advantages of doT](http://olado.github.io/doT/))
-* Plays well with client libraries using the curly {{ }} syntax (Angular, Ember, Backbone...)
+* Plays well with client libraries that use the curly {{ }} syntax (Angular, Ember, Backbone...)
 * Layout support, partial support
 * Cache support
 
@@ -42,9 +42,9 @@ Then in your code
 Plays well with Angular, Ember, Backbone, etc
 ---------------------------------------------
 
-By default, the engine uses [[ ]] instead of {{ }} on the backend. This allows the use of front-end templating system that uses {{ }}.
+By default, the engine uses [[ ]] instead of {{ }} on the backend. This allows the use of front-end templating libraries that already use {{ }}.
 
-If you want to configure this you can change
+If you want to configure this you can change the library settings and doT settings.
 
     engine.setting.layout = /\[\[###([\s\S]+?)\]\]/g;
     engine.settings.dot = {
@@ -64,7 +64,7 @@ If you want to configure this you can change
 Layout
 ------
 
-### Supports multiple sections.
+### Supports multiple sections
 
 **master.dot**
 
@@ -95,7 +95,7 @@ Layout
       Hello from index.dot again
     #]]
 
-### Supports cascading layouts.
+### Supports cascading layouts
 
 **master.dot**
 
@@ -129,8 +129,7 @@ Layout
       Hello from index.dot
     #]]
 
-Partials
---------
+### Supports Partials
 
 index.dot
 
@@ -142,6 +141,21 @@ partials/hello.dot
 
     <span>Hello from partials/hello.dot</span>
 
+Server model
+------------
+
+In your application, you can render the view by calling
+
+**index.js**
+    app.get('/', function(req, res){
+      res.render('index', { fromServer: 'Hello from server', });
+    });
+
+On the view, you can access the model by calling
+
+**index.dot**
+    Server says: [[=server.fromServer]]
+
 Caching
 -------
 
@@ -150,6 +164,16 @@ Caching is enabled when express is running in production via the 'view cache' va
 
 How to run the examples
 -----------------------
+
+Install express-dot-engine
+
+    > npm install express-dot-engine
+
+Then cd to the directory
+
+    > cd express-dot-engine
+
+Install the example dependencies (yes install express-dot-engine within itself whoa!)
 
     > npm install express
     > npm install express-dot-engine
