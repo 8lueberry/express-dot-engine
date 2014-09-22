@@ -59,7 +59,7 @@ If you want to configure this you can change the library settings and doT settin
       strip: false,
       append: true,
       selfcontained: false,
-    }
+    };
 
 Layout
 ------
@@ -123,7 +123,7 @@ Layout
 
 **index.dot**
 
-    [[###layout.dot]]
+    [[###wife.dot]]
 
     [[##body:
       Hello from index.dot
@@ -155,6 +155,8 @@ On the view, you can access the model by calling
 
 **index.dot**
     Server says: [[=server.fromServer]]
+
+Partials and master layouts also has access to the server models.
 
 Caching
 -------
