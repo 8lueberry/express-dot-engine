@@ -1,0 +1,39 @@
+{
+  "name": "express-dot-engine",
+  "version": "0.0.1",
+  "description": "Node.js engine using the ultra fast doT templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)",
+  "author": "Dan Le Van",
+  "homepage": "https://github.com/danlevan/express-dot-engine",
+  "keywords": [
+    "express",
+    "doT",
+    "engine",
+    "template"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/danlevan/express-dot-engine.git"
+  },
+  "bugs": "",
+  "contributors": "",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/danlevan/express-dot-engine/blob/master/LICENSE"
+    }
+  ],
+  "main": "./engine.js",
+  "scripts": {
+    "start": "",
+    "test": ""
+  },
+  "engines": {
+    "node": "~0.10.0"
+  },
+  "engineStrict": true,
+  "dependencies": {
+    "dot": "^1.0.2"
+  },
+  "optionalDependencies": {},
+  "devDependencies": {}
+}
