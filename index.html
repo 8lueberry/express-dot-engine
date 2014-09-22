@@ -1,76 +1,270 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <title>Express-dot-engine by danlevan</title>
+    <meta name="description" content="Express-dot-engine : Node.js engine using the ultra fast doT templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Express-dot-engine</title>
   </head>
 
   <body>
-    <div id="container">
-      <div class="inner">
 
-        <header>
-          <h1>Express-dot-engine</h1>
-          <h2>Node.js engine using the ultra fast doT templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)</h2>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/danlevan/express-dot-engine">View on GitHub</a>
+
+          <h1 id="project_title">Express-dot-engine</h1>
+          <h2 id="project_tagline">Node.js engine using the ultra fast doT templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/danlevan/express-dot-engine/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/danlevan/express-dot-engine/tarball/master">Download this project as a tar.gz file</a>
+            </section>
         </header>
+    </div>
 
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/danlevan/express-dot-engine/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/danlevan/express-dot-engine/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/danlevan/express-dot-engine" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="express-dot-engine" class="anchor" href="#express-dot-engine"><span class="octicon octicon-link"></span></a>express-dot-engine</h1>
 
-        <hr>
+<p>Node.js engine using the ultra fast <a href="http://olado.github.io/doT/">doT</a> templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)</p>
 
-        <section id="main_content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<ul>
+<li>Only 1 dependency (doT)</li>
+<li>Extremely fast (<a href="http://olado.github.io/doT/">all the advantages of doT</a>)</li>
+<li>Plays well with client libraries that use the curly {{ }} syntax (Angular, Ember, Backbone...)</li>
+<li>Layout support, partial support</li>
+<li>Cache support</li>
+</ul><h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p>Install with npm</p>
+
+<pre><code>&gt; npm install express-dot-engine --save
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>Then in your code</p>
+
+<pre><code>var engine = require('express-dot-engine');
+var express = require('express');
+var path = require('path');
+
+var app = express();
+
+app.engine('dot', engine.__express);
+app.set('views', path.join(__dirname, './views'));
+app.set('view engine', 'dot');
+
+app.get('/', function(req, res){
+  res.render('index', { fromServer: 'Hello from server', });
+});
+
+var server = app.listen(3000, function() {
+  console.log('Listening on port %d', server.address().port);
+});
+</code></pre>
+
+<h2>
+<a name="plays-well-with-angular-ember-backbone-etc" class="anchor" href="#plays-well-with-angular-ember-backbone-etc"><span class="octicon octicon-link"></span></a>Plays well with Angular, Ember, Backbone, etc</h2>
+
+<p>By default, the engine uses [[ ]] instead of {{ }} on the backend. This allows the use of front-end templating libraries that already use {{ }}.</p>
+
+<p>If you want to configure this you can change the library settings and doT settings.</p>
+
+<pre><code>engine.setting.layout = /\[\[###([\s\S]+?)\]\]/g;
+engine.settings.dot = {
+  evaluate:    /\[\[([\s\S]+?)\]\]/g,
+  interpolate: /\[\[=([\s\S]+?)\]\]/g,
+  encode:      /\[\[!([\s\S]+?)\]\]/g,
+  use:         /\[\[#([\s\S]+?)\]\]/g,
+  define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
+  conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
+  iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
+  varname: 'layout, server',
+  strip: false,
+  append: true,
+  selfcontained: false,
+};
+</code></pre>
+
+<h2>
+<a name="layout" class="anchor" href="#layout"><span class="octicon octicon-link"></span></a>Layout</h2>
 
 <h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<a name="supports-multiple-sections" class="anchor" href="#supports-multiple-sections"><span class="octicon octicon-link"></span></a>Supports multiple sections</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p><strong>master.dot</strong></p>
+
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;title&gt;Test page&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    Hello from master.dot &lt;br /&gt;
+
+    [[=layout.body]] &lt;br /&gt;
+
+    [[=layout.body2]]
+
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p><strong>index.dot</strong></p>
+
+<pre><code>[[###master.dot]]
+
+[[##body:
+  Hello from index.dot
+#]]
+
+[[##body2:
+  Hello from index.dot again
+#]]
+</code></pre>
 
 <h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<a name="supports-cascading-layouts" class="anchor" href="#supports-cascading-layouts"><span class="octicon octicon-link"></span></a>Supports cascading layouts</h3>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p><strong>master.dot</strong></p>
+
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;title&gt;Test page&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    Hello from master.dot &lt;br /&gt;
+
+    [[=layout.body]]
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p><strong>wife.dot</strong></p>
+
+<pre><code>[[###master.dot]]
+
+[[##body:
+  Hello from wife.dot
+
+  [[=layout.body]]
+#]]
+</code></pre>
+
+<p><strong>index.dot</strong></p>
+
+<pre><code>[[###wife.dot]]
+
+[[##body:
+  Hello from index.dot
+#]]
+</code></pre>
 
 <h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a name="supports-partials" class="anchor" href="#supports-partials"><span class="octicon octicon-link"></span></a>Supports Partials</h3>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>index.dot</p>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<pre><code>&lt;div&gt;
+  My partial says: [[#def.partial('partials/hello.dot')]]
+&lt;/div&gt;
+</code></pre>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-        </section>
+<p>partials/hello.dot</p>
 
-        <footer>
-          Express-dot-engine is maintained by <a href="https://github.com/danlevan">danlevan</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
+<pre><code>&lt;span&gt;Hello from partials/hello.dot&lt;/span&gt;
+</code></pre>
 
-        
-      </div>
+<h2>
+<a name="server-model" class="anchor" href="#server-model"><span class="octicon octicon-link"></span></a>Server model</h2>
+
+<p>In your application, you can render the view by calling</p>
+
+<p><strong>index.js</strong>
+    app.get('/', function(req, res){
+      res.render('index', { fromServer: 'Hello from server', });
+    });</p>
+
+<p>On the view, you can access the model by calling</p>
+
+<p><strong>index.dot</strong>
+    Server says: [[=server.fromServer]]</p>
+
+<p>Partials and master layouts also has access to the server models.</p>
+
+<h2>
+<a name="caching" class="anchor" href="#caching"><span class="octicon octicon-link"></span></a>Caching</h2>
+
+<p>Caching is enabled when express is running in production via the 'view cache' variable in express. This is done automatically. If you want to enable cache in development, you can add this
+    app.set('view cache', true);</p>
+
+<h2>
+<a name="how-to-run-the-examples" class="anchor" href="#how-to-run-the-examples"><span class="octicon octicon-link"></span></a>How to run the examples</h2>
+
+<p>Install express-dot-engine</p>
+
+<pre><code>&gt; npm install express-dot-engine
+</code></pre>
+
+<p>Then cd to the directory</p>
+
+<pre><code>&gt; cd express-dot-engine
+</code></pre>
+
+<p>Install the example dependencies (yes install express-dot-engine within itself whoa!)</p>
+
+<pre><code>&gt; npm install express
+&gt; npm install express-dot-engine
+</code></pre>
+
+<p>Then run the example you want</p>
+
+<pre><code>&gt; node examples/simple
+</code></pre>
+
+<p>or</p>
+
+<pre><code>&gt; node examples/cascade
+</code></pre>
+
+<p>or</p>
+
+<pre><code>&gt; node examples/partials
+</code></pre>
+      </section>
     </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Express-dot-engine maintained by <a href="https://github.com/danlevan">danlevan</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-55029579-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
   </body>
 </html>
