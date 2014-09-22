@@ -16,16 +16,16 @@ Installation
 ------------
 
 Install with npm
-    npm install express-dot-engine --save
+    `npm install express-dot-engine --save`
 
 Then in your code
 
-    var engine = require('express-dot-engine');
+    `var engine = require('express-dot-engine');
     var express = require('express');
     var app = express();
     app.engine('dot', engine.__express);
     app.set('views', path.join(__dirname, './views'));
-    app.set('view engine', 'dot');
+    app.set('view engine', 'dot');`
 
 Plays well with Angular, Ember, Backbone, etc
 ---------------------------------------------
@@ -34,7 +34,7 @@ By default, the engine uses [[ ]] instead of {{ }} on the backend. This allows t
 
 If you want to configure this you can change
 
-    engine.setting.layout = /\[\[###([\s\S]+?)\]\]/g;
+    `engine.setting.layout = /\[\[###([\s\S]+?)\]\]/g;
     engine.settings.dot = {
       evaluate:    /\[\[([\s\S]+?)\]\]/g,
       interpolate: /\[\[=([\s\S]+?)\]\]/g,
@@ -47,15 +47,15 @@ If you want to configure this you can change
       strip: false,
       append: true,
       selfcontained: false,
-    }
+    }`
 
 Layout
 ------
 
-Supports multiple sections.
+### Supports multiple sections.
 
-master.dot
-    <!doctype html>
+**master.dot**
+    `<!doctype html>
     <html lang="en">
       <head>
         <title>Volunteerily</title>
@@ -68,10 +68,10 @@ master.dot
         [[=layout.body2]]
 
       </body>
-    </html>
+    </html>`
 
-index.dot
-    [[###master.dot]]
+**index.dot**
+    `[[###master.dot]]
 
     [[##body:
       Hello from index.dot
@@ -79,12 +79,12 @@ index.dot
 
     [[##body2:
       Hello from index.dot again
-    #]]
+    #]]`
 
-Supports cascading layouts.
+### Supports cascading layouts.
 
-master.dot
-    <!doctype html>
+**master.dot**
+    `<!doctype html>
     <html lang="en">
       <head>
         <title>Volunteerily</title>
@@ -94,38 +94,38 @@ master.dot
 
         [[=layout.body]]
       </body>
-    </html>
+    </html>`
 
-wife.dot
-    [[###master.dot]]
+**wife.dot**
+    `[[###master.dot]]
 
     [[##body:
       Hello from wife.dot
 
       [[=layout.body]]
-    #]]
+    #]]`
 
-index.dot
-    [[###layout.dot]]
+**index.dot**
+    `[[###layout.dot]]
 
     [[##body:
       Hello from index.dot
-    #]]
+    #]]`
 
 Partials
 --------
 
 index.dot
-    <div>
+    `<div>
       My partial says: [[#def.partial('partials/hello.dot')]]
-    </div>
+    </div>`
 
 partials/hello.dot
-    <span>Hello from partials/hello.dot</span>  
+    `<span>Hello from partials/hello.dot</span>`
 
 Caching
 -------
 
 Caching is enabled when express is running in production via the 'view cache' variable in express. This is done automatically. If you want to enable cache in development, you can add this
 
-    app.set('view cache', true);
+    `app.set('view cache', true);`
