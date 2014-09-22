@@ -8,7 +8,7 @@ Features
 
 * Only 1 dependency (doT)
 * Extremely fast ([all the advantages of doT](http://olado.github.io/doT/))
-* Plays well with client libraries using the curly {{ }} syntax
+* Plays well with client libraries using the curly {{ }} syntax (Angular, Ember, Backbone...)
 * Layout support, partial support
 * Cache support
 
@@ -16,16 +16,28 @@ Installation
 ------------
 
 Install with npm
-    `npm install express-dot-engine --save`
+
+    > npm install express-dot-engine --save
 
 Then in your code
 
     var engine = require('express-dot-engine');
     var express = require('express');
+    var path = require('path');
+
     var app = express();
+
     app.engine('dot', engine.__express);
     app.set('views', path.join(__dirname, './views'));
     app.set('view engine', 'dot');
+
+    app.get('/', function(req, res){
+      res.render('index', { fromServer: 'Hello from server', });
+    });
+
+    var server = app.listen(3000, function() {
+      console.log('Listening on port %d', server.address().port);
+    });
 
 Plays well with Angular, Ember, Backbone, etc
 ---------------------------------------------
@@ -55,10 +67,11 @@ Layout
 ### Supports multiple sections.
 
 **master.dot**
+
     <!doctype html>
     <html lang="en">
       <head>
-        <title>Volunteerily</title>
+        <title>Test page</title>
       </head>
       <body>
         Hello from master.dot <br />
@@ -71,6 +84,7 @@ Layout
     </html>
 
 **index.dot**
+
     [[###master.dot]]
 
     [[##body:
@@ -84,10 +98,11 @@ Layout
 ### Supports cascading layouts.
 
 **master.dot**
+
     <!doctype html>
     <html lang="en">
       <head>
-        <title>Volunteerily</title>
+        <title>Test page</title>
       </head>
       <body>
         Hello from master.dot <br />
@@ -97,6 +112,7 @@ Layout
     </html>
 
 **wife.dot**
+
     [[###master.dot]]
 
     [[##body:
@@ -106,6 +122,7 @@ Layout
     #]]
 
 **index.dot**
+
     [[###layout.dot]]
 
     [[##body:
@@ -116,11 +133,13 @@ Partials
 --------
 
 index.dot
+
     <div>
       My partial says: [[#def.partial('partials/hello.dot')]]
     </div>
 
 partials/hello.dot
+
     <span>Hello from partials/hello.dot</span>
 
 Caching
@@ -128,3 +147,21 @@ Caching
 
 Caching is enabled when express is running in production via the 'view cache' variable in express. This is done automatically. If you want to enable cache in development, you can add this
     app.set('view cache', true);
+
+How to run the examples
+-----------------------
+
+    > npm install express
+    > npm install express-dot-engine
+
+Then run the example you want
+
+    > node examples/simple
+
+or
+
+    > node examples/cascade
+
+or
+
+    > node examples/partials

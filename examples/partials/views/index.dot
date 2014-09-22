@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Test page</title>
+  </head>
+  <body>
+    Hello from index.dot <br />
+
+    [[#def.partial('partials/hello.dot')]]
+
+  </body>
+</html

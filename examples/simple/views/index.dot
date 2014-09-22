@@ -1,0 +1,10 @@
+[[###master.dot]]
+
+[[##body:
+  Hello from index.dot.. <br />
+  Server says: [[=server.fromServer]]
+#]]
+
+[[##body2:
+  Hello from index.dot again
+#]]
