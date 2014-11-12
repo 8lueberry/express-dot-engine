@@ -24,8 +24,7 @@
   ],
   "main": "index.js",
   "scripts": {
-    "start": "",
-    "test": ""
+    "test": "mocha"
   },
   "engines": {
     "node": "~0.10.0"
