@@ -1,16 +1,16 @@
+var _ = require('lodash');
 var fs = require('fs');
 var dot = require('dot');
 var path = require('path');
+var yaml = require('js-yaml');
 
 /**
  * Engine settings
  */
 var settings = {
 
-  // used for defining master pages
-  layout: /\[\[###([\s\S]+?)\]\]/g,
+  config: /^---([\s\S]+?)---/g,
 
-  // dot settings
   dot: {
     evaluate:    /\[\[([\s\S]+?)\]\]/g,
     interpolate: /\[\[=([\s\S]+?)\]\]/g,
@@ -19,7 +19,7 @@ var settings = {
     define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
     conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
     iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-    varname: 'layout, server',
+    varname: 'layout, model',
     strip: false,
     append: true,
     selfcontained: false,
@@ -51,11 +51,14 @@ var dotDef = {
   // injected
   options: { },
 
+  // the current directory
+  dirname: '',
+
   // supports partial
   partial: function(partialPath) {
 
     var template = getTemplate(
-      path.join(this.options.settings.views, partialPath),
+      path.join(this.dirname || this.options.settings.views, partialPath),
       this.options
     );
 
@@ -68,37 +71,35 @@ var dotDef = {
  * if the 'options.cache' set by express is true.
  * @param {Object} options The constructor parameters:
  *
- * {Object} options The option from the engine
+ * {Object} engine The option from the engine
  *
  * There are 2 options
  *
  * Case 1: A layout view
- * {String} masterFilename The master template filename
+ * {String} master The master template filename
  * {Object} sections A key/value containing the sections of the template
  *
  * Case 2: A standalone view
- * {String} templateStr The template string
+ * {String} body The template string
  */
 function Template(options) {
+  this.options = options;
+  this.templates = {};
+  this.isLayout = !!options.config.layout;
 
-  // standalone view
-  if (options.templateStr) {
-    this.isLayout = false;
-    options.sectionStrList = { body: options.templateStr, };
-  }
-  else {
-    this.masterFilename = options.masterFilename;
-    this.isLayout = true;
+  if (this.isLayout) {
+    this.master = path.join(options.dirname, options.config.layout);
   }
 
   // build the doT templates
 
-  dotDef.options = options.options;
+  dotDef.options = options.engine;
+  dotDef.dirname = options.dirname;
 
-  this.sectionDotTemplates = {};
-  for (var key in options.sectionStrList) {
-    this.sectionDotTemplates[key] = dot.template(
-      options.sectionStrList[key],
+  // build the templates
+  for (var key in options.sections) {
+    this.templates[key] = dot.template(
+      options.sections[key],
       settings.dot,
       dotDef
     );
@@ -109,17 +110,21 @@ function Template(options) {
  * Renders the template.
  * If callback is passed, it will be called asynchronously.
  * @param {Object} layout The layout key/value
- * @param {Object} data The model to pass to the view
+ * @param {Object} model The model to pass to the view
  * @param {Function} callback (Optional) The async node style callback
  */
-Template.prototype.render = function(layout, options, callback) {
+Template.prototype.render = function(layout, model, callback) {
   var isAsync = callback && typeof callback === 'function';
 
+  var layoutModel = _.merge({}, this.options.config, layout);
+
   // render the sections
-  var renderedSections = [];
   try {
-    for (var key in this.sectionDotTemplates) {
-      renderedSections[key] = this.sectionDotTemplates[key](layout, options);
+    for (var key in this.templates) {
+      layoutModel[key] = this.templates[key](
+        layoutModel,
+        model
+      );
     }
   }
   catch(err) {
@@ -129,24 +134,24 @@ Template.prototype.render = function(layout, options, callback) {
 
   // no layout
   if (!this.isLayout) {
-    if (isAsync) { callback(null, renderedSections.body); }
-    return renderedSections.body;
+    if (isAsync) { callback(null, layoutModel.body); }
+    return layoutModel.body;
   }
 
   // render the master sync
   if (!isAsync) {
-    var masterTemplate = getTemplate(this.masterFilename, options);
-    return masterTemplate.render(renderedSections, options);
+    var masterTemplate = getTemplate(this.master, model);
+    return masterTemplate.render(layoutModel, model);
   }
 
   // render the master async
-  getTemplate(this.masterFilename, options, function(err, masterTemplate) {
+  getTemplate(this.master, model, function(err, masterTemplate) {
     if (err) {
       callback(err);
       return;
     }
 
-    return masterTemplate.render(renderedSections, options, callback);
+    return masterTemplate.render(layoutModel, model, callback);
   });
 };
 
@@ -240,27 +245,30 @@ function buildTemplate(filename, options, callback) {
  */
 function builtTemplateFromString(str, filename, options) {
 
-  // check if a layout is needed
-  var masterFilename = null;
-  str = str.replace(settings.layout, function(m, master) {
-    masterFilename = path.join(path.dirname(filename), master);
-  });
+  var config = {};
 
-  // normal view, no layouts
-  if (masterFilename === null) {
-    return new Template({ options: options, templateStr: str, });
-  }
+  // config at the beginning of the file
+  str.replace(settings.config, function(m, conf) {
+    config = yaml.safeLoad(conf);
+  });
 
   // layout sections
   var sections = {};
-  str = str.replace(settings.dot.define, function(m, code, assign, value) {
-    sections[code] = value;
-  });
+
+  if (!config.layout) {
+    sections.body = str;
+  }
+  else {
+    str.replace(settings.dot.define, function(m, code, assign, value) {
+      sections[code] = value;
+    });
+  }
 
   return new Template({
-    options: options,
-    masterFilename: masterFilename,
-    sectionStrList: sections,
+    engine: options,
+    config: config,
+    sections: sections,
+    dirname: path.dirname(filename),
   });
 }
 
@@ -271,19 +279,13 @@ function builtTemplateFromString(str, filename, options) {
  * @param {Function} callback The async node style callback
  */
 function engine(filename, options, callback) {
-  getTemplate(
-    filename,
-    options,
-    function(err, template) {
-      if (err) { callback(err); return; }
-
-      template.render(
-        {},
-        options,
-        callback
-      );
+  getTemplate(filename, options, function(err, template) {
+    if (err) {
+      return callback(err);
     }
-  );
+
+    template.render({}, options, callback);
+  });
 }
 
 module.exports = {

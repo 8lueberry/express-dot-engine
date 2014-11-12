@@ -1,0 +1,8 @@
+---
+layout: boss.dot
+title: Page title
+---
+
+[[##section:
+  Hello from me.dot
+#]]

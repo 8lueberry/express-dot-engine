@@ -1,193 +1,253 @@
-express-dot-engine
-==================
+# express-dot-engine
 
-Node.js engine using the ultra fast [doT](http://olado.github.io/doT/) templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)
+[![GitHub version](https://badge.fury.io/gh/danlevan%2Fexpress-dot-engine.svg)](http://badge.fury.io/gh/danlevan%2Fexpress-dot-engine) [![npm version](https://badge.fury.io/js/express-dot-engine.svg)](http://badge.fury.io/js/express-dot-engine)
 
-Features
---------
+> Node.js engine using the ultra fast [doT](http://olado.github.io/doT/) templating with support for layouts, partials. It's friendly for front-end web libraries (Angular, Ember, Backbone...)
 
-* Only 1 dependency (doT)
-* Extremely fast ([all the advantages of doT](http://olado.github.io/doT/))
-* Plays well with client libraries that use the curly {{ }} syntax (Angular, Ember, Backbone...)
-* Layout support, partial support
-* Cache support
+## Features
 
-Installation
-------------
+* Extremely fast
+* All the advantage of ([doT](http://olado.github.io/doT/))
+* Layout and partial support
+* Uses `[[ ]]` by default, not clashing with `{{ }}` (Angular, Ember...)
+* Automatic caching in production
+
+## Installation
 
 Install with npm
 
-    > npm install express-dot-engine --save
+```sh
+$ npm install express-dot-engine --save
+```
 
-Then in your code
+Then set the engine in express
 
-    var engine = require('express-dot-engine');
-    var express = require('express');
-    var path = require('path');
+```javascript
+var engine = require('express-dot-engine');
+...
 
-    var app = express();
+app.engine('dot', engine.__express);
+app.set('views', path.join(__dirname, './views'));
+app.set('view engine', 'dot');
+```
 
-    app.engine('dot', engine.__express);
-    app.set('views', path.join(__dirname, './views'));
-    app.set('view engine', 'dot');
+## Layout
 
-    app.get('/', function(req, res){
-      res.render('index', { fromServer: 'Hello from server', });
-    });
+You can specify the layout using [yaml](http://yaml.org/) and refer to the section as you would from a model (e.g. `[[= layout.whatever ]]`).
 
-    var server = app.listen(3000, function() {
-      console.log('Listening on port %d', server.address().port);
-    });
+You can also define any extra configurations (like a page title) that are inherited to the master.
 
-Plays well with Angular, Ember, Backbone, etc
----------------------------------------------
+### Multiple section support
 
-By default, the engine uses [[ ]] instead of {{ }} on the backend. This allows the use of front-end templating libraries that already use {{ }}.
+`master.dot`
 
-If you want to configure this you can change the library settings and doT settings.
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>[[= layout.title ]]</title>
+  </head>
+  <body>
+    Hello from master.dot <br />
+    [[= layout.section1 ]] <br />
+    [[= layout.section2 ]]
+  </body>
+</html>
+```
 
-    engine.setting.layout = /\[\[###([\s\S]+?)\]\]/g;
-    engine.settings.dot = {
-      evaluate:    /\[\[([\s\S]+?)\]\]/g,
-      interpolate: /\[\[=([\s\S]+?)\]\]/g,
-      encode:      /\[\[!([\s\S]+?)\]\]/g,
-      use:         /\[\[#([\s\S]+?)\]\]/g,
-      define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
-      conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
-      iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-      varname: 'layout, server',
-      strip: false,
-      append: true,
-      selfcontained: false,
-    };
+`index.dot`
+```html
+---
+layout: master.dot
+title: Index page
+---
 
-Layout
-------
+[[##section1:
+  Hello from index.dot
+#]]
 
-### Supports multiple sections
+[[##section2:
+  Hello from index.dot again
+#]]
+```
 
-**master.dot**
+#### Result
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Index page</title>
+  </head>
+  <body>
+    Hello from master.dot <br />
+    Hello from index.dot <br />
+    Hello from index.dot again
+  </body>
+</html>
+```
 
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <title>Test page</title>
-      </head>
-      <body>
-        Hello from master.dot <br />
+### Cascading layout support
 
-        [[=layout.body]] <br />
+`CEO.dot`
 
-        [[=layout.body2]]
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>[[= layout.title ]]</title>
+  </head>
+  <body>
+    Hello from CEO.dot <br />
+    [[=layout.section]]
+  </body>
+</html>
+```
 
-      </body>
-    </html>
+`Boss.dot`
 
-**index.dot**
+```html
+---
+layout: CEO.dot
+title: Boss page
+---
 
-    [[###master.dot]]
+[[##section:
+  Hello from Boss.dot <br />
+  [[=layout.body]]
+#]]
+```
 
-    [[##body:
-      Hello from index.dot
-    #]]
+`me.dot`
 
-    [[##body2:
-      Hello from index.dot again
-    #]]
+```html
+---
+layout: Boss.dot
+---
 
-### Supports cascading layouts
+[[##body:
+  Hello from me.dot
+#]]
+```
 
-**master.dot**
+#### Result
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Boss page</title>
+  </head>
+  <body>
+    Hello from CEO.dot <br />
+    Hello from Boss.dot <br />
+    Hello from me.dot
+  </body>
+</html>
+```
 
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <title>Test page</title>
-      </head>
-      <body>
-        Hello from master.dot <br />
+## Partials
 
-        [[=layout.body]]
-      </body>
-    </html>
+You can also use doT partials. The path is relative to the path of the current file.
 
-**wife.dot**
+`index.dot`
 
-    [[###master.dot]]
+```html
+<div>
+  My partial says: [[#def.partial('partials/hello.dot')]]
+</div>
+```
 
-    [[##body:
-      Hello from wife.dot
+`partials/hello.dot`
 
-      [[=layout.body]]
-    #]]
+```html
+<span>Hello from partials/hello.dot</span>
+```
 
-**index.dot**
+### Result
 
-    [[###wife.dot]]
+```html
+<div>
+  My partial says: <span>Hello from partials/hello.dot</span>
+</div>
+```
 
-    [[##body:
-      Hello from index.dot
-    #]]
+## Server model
 
-### Supports Partials
+In your node application, the model passed to the engine will be available through `[[= model. ]]` in your template.
 
-index.dot
+```javascript
+app.get('/', function(req, res){
+  res.render('index', { fromServer: 'Hello from server', });
+});
+```
 
-    <div>
-      My partial says: [[#def.partial('partials/hello.dot')]]
-    </div>
+```html
+<div>
+  Server says: [[= model.fromServer ]]
+</div>
+```
 
-partials/hello.dot
+### Result
 
-    <span>Hello from partials/hello.dot</span>
+```html
+<div>
+  Server says: Hello from server
+</div>
+```
 
-Server model
-------------
+### Layouts and Partials also has access to the server models.
 
-In your application, you can render the view by calling
+## Settings
 
-**index.js**
-    app.get('/', function(req, res){
-      res.render('index', { fromServer: 'Hello from server', });
-    });
+By default, the engine uses `[[ ]]` instead of `{{ }}` on the backend. This allows the use of front-end templating libraries that already use `{{ }}`.
 
-On the view, you can access the model by calling
+If you want to configure this you can change the exposed [doT settings](http://olado.github.io/doT/).
 
-**index.dot**
-    Server says: [[=server.fromServer]]
+```javascript
+// doT settings
+engine.settings.dot = {
+  evaluate:    /\[\[([\s\S]+?)\]\]/g,
+  interpolate: /\[\[=([\s\S]+?)\]\]/g,
+  encode:      /\[\[!([\s\S]+?)\]\]/g,
+  use:         /\[\[#([\s\S]+?)\]\]/g,
+  define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
+  conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
+  iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
+  varname: 'layout, model',
+  strip: false,
+  append: true,
+  selfcontained: false,
+};
+```
 
-Partials and master layouts also has access to the server models.
-
-Caching
--------
+## Caching
 
 Caching is enabled when express is running in production via the 'view cache' variable in express. This is done automatically. If you want to enable cache in development, you can add this
-    app.set('view cache', true);
 
-How to run the examples
------------------------
+```javascript
+app.set('view cache', true);
+```
 
-Install express-dot-engine
+## How to run the examples
 
-    > npm install express-dot-engine
+### 1. Install express-dot-engine
 
-Then cd to the directory
+```sh
+$ npm install express-dot-engine
+```
 
-    > cd express-dot-engine
+### 2. Install express
 
-Install the example dependencies (yes install express-dot-engine within itself whoa!)
+```sh
+$ npm install express
+```
 
-    > npm install express
-    > npm install express-dot-engine
+### 3. Run the example
 
-Then run the example you want
+```sh
+$ node express-dot-engine/examples/simple
+```
 
-    > node examples/simple
+Open your browser to `http://localhost:2015`
 
-or
-
-    > node examples/cascade
-
-or
-
-    > node examples/partials
+## License
+[MIT](LICENSE)

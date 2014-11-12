@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>[[= layout.title ]]</title>
+  </head>
+  <body>
+    Hello from CEO.dot <br />
+    [[= layout.section ]]
+  </body>
+</html>

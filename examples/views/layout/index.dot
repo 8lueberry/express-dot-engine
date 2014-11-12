@@ -1,0 +1,12 @@
+---
+layout: master.dot
+title: Index page
+---
+
+[[##section1:
+  Hello from index.dot
+#]]
+
+[[##section2:
+  Hello from index.dot again
+#]]

@@ -1,12 +1,11 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Test page</title>
+    <title>[[= layout.title ]]</title>
   </head>
   <body>
     Hello from master.dot <br />
-
-    [[=layout.body]]
-
+    [[= layout.section1 ]] <br />
+    [[= layout.section2 ]]
   </body>
 </html>
