@@ -6,8 +6,7 @@
   <body>
     <h1>Example</h1>
 
-    Hello from template <br />
-    [[= model.fromServer ]]
+    Server says: [[= model.fromServer ]]
 
     <ul>
       <li><a href="/layout">Layout example</a></li>

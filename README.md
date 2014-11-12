@@ -98,7 +98,7 @@ title: Index page
   </head>
   <body>
     Hello from CEO.dot <br />
-    [[=layout.section]]
+    [[= layout.section ]]
   </body>
 </html>
 ```
@@ -107,13 +107,12 @@ title: Index page
 
 ```html
 ---
-layout: CEO.dot
-title: Boss page
+layout: ceo.dot
 ---
 
 [[##section:
   Hello from Boss.dot <br />
-  [[=layout.body]]
+  [[=layout.section]]
 #]]
 ```
 
@@ -121,10 +120,11 @@ title: Boss page
 
 ```html
 ---
-layout: Boss.dot
+layout: boss.dot
+title: Page title
 ---
 
-[[##body:
+[[##section:
   Hello from me.dot
 #]]
 ```
@@ -152,14 +152,14 @@ You can also use doT partials. The path is relative to the path of the current f
 
 ```html
 <div>
-  My partial says: [[#def.partial('partials/hello.dot')]]
+  Message from partial: [[#def.partial('partials/hello.dot')]]
 </div>
 ```
 
 `partials/hello.dot`
 
 ```html
-<span>Hello from partials/hello.dot</span>
+<span>Hello from partial</span>
 ```
 
 ### Result
@@ -244,7 +244,7 @@ $ npm install express
 ### 3. Run the example
 
 ```sh
-$ node express-dot-engine/examples/simple
+$ node node_module/express-dot-engine/examples
 ```
 
 Open your browser to `http://localhost:2015`
