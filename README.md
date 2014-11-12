@@ -31,6 +31,39 @@ app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'dot');
 ```
 
+## doT template
+
+By default, the engine uses `[[ ]]` instead of `{{ }}` on the backend. This allows the use of front-end templating libraries that already use `{{ }}`.
+
+```
+[[ ]]     for evaluation
+[[= ]]    for interpolation
+[[! ]]    for interpolation with encoding
+[[# ]]    for compile-time evaluation/includes and partials
+[[## #]]  for compile-time defines
+[[? ]]    for conditionals
+[[~ ]]    for array iteration
+```
+
+If you want to configure this you can change the exposed [doT settings](http://olado.github.io/doT/).
+
+```javascript
+// doT settings
+engine.settings.dot = {
+  evaluate:    /\[\[([\s\S]+?)\]\]/g,
+  interpolate: /\[\[=([\s\S]+?)\]\]/g,
+  encode:      /\[\[!([\s\S]+?)\]\]/g,
+  use:         /\[\[#([\s\S]+?)\]\]/g,
+  define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
+  conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
+  iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
+  varname: 'layout, model',
+  strip: false,
+  append: true,
+  selfcontained: false,
+};
+```
+
 ## Layout
 
 You can specify the layout using [yaml](http://yaml.org/) and refer to the section as you would from a model (e.g. `[[= layout.whatever ]]`).
@@ -195,29 +228,6 @@ app.get('/', function(req, res){
 ```
 
 ### Layouts and Partials also has access to the server models.
-
-## Settings
-
-By default, the engine uses `[[ ]]` instead of `{{ }}` on the backend. This allows the use of front-end templating libraries that already use `{{ }}`.
-
-If you want to configure this you can change the exposed [doT settings](http://olado.github.io/doT/).
-
-```javascript
-// doT settings
-engine.settings.dot = {
-  evaluate:    /\[\[([\s\S]+?)\]\]/g,
-  interpolate: /\[\[=([\s\S]+?)\]\]/g,
-  encode:      /\[\[!([\s\S]+?)\]\]/g,
-  use:         /\[\[#([\s\S]+?)\]\]/g,
-  define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
-  conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
-  iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-  varname: 'layout, model',
-  strip: false,
-  append: true,
-  selfcontained: false,
-};
-```
 
 ## Caching
 
