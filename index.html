@@ -1,259 +1,281 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Express-dot-engine : Node.js engine using the ultra fast doT templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)">
+    <title>Express-dot-engine by danlevan</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Express-dot-engine</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Express-dot-engine</h1>
+        <p>Node.js engine using the ultra fast doT templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)</p>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/danlevan/express-dot-engine">View on GitHub</a>
+        <p class="view"><a href="https://github.com/danlevan/express-dot-engine">View the Project on GitHub <small>danlevan/express-dot-engine</small></a></p>
 
-          <h1 id="project_title">Express-dot-engine</h1>
-          <h2 id="project_tagline">Node.js engine using the ultra fast doT templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)</h2>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/danlevan/express-dot-engine/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/danlevan/express-dot-engine/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+        <ul>
+          <li><a href="https://github.com/danlevan/express-dot-engine/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/danlevan/express-dot-engine/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/danlevan/express-dot-engine">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
         <h1>
-<a name="express-dot-engine" class="anchor" href="#express-dot-engine"><span class="octicon octicon-link"></span></a>express-dot-engine</h1>
+<a id="express-dot-engine" class="anchor" href="#express-dot-engine" aria-hidden="true"><span class="octicon octicon-link"></span></a>express-dot-engine</h1>
 
-<p>Node.js engine using the ultra fast <a href="http://olado.github.io/doT/">doT</a> templating with support for layouts, partials and friendly for front-end web libraries (Angular, Ember, Backbone...)</p>
+<p><a href="http://badge.fury.io/gh/danlevan%2Fexpress-dot-engine"><img src="https://badge.fury.io/gh/danlevan%2Fexpress-dot-engine.svg" alt="GitHub version"></a> <a href="http://badge.fury.io/js/express-dot-engine"><img src="https://badge.fury.io/js/express-dot-engine.svg" alt="npm version"></a> <a href="https://travis-ci.org/danlevan/express-dot-engine"><img src="https://travis-ci.org/danlevan/express-dot-engine.svg" alt="Build Status"></a></p>
+
+<blockquote>
+<p>Node.js engine using the ultra fast <a href="http://olado.github.io/doT/">doT</a> templating with support for layouts, partials. It's friendly for front-end web libraries (Angular, Ember, Backbone...)</p>
+</blockquote>
 
 <h2>
-<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
 
 <ul>
-<li>Only 1 dependency (doT)</li>
-<li>Extremely fast (<a href="http://olado.github.io/doT/">all the advantages of doT</a>)</li>
-<li>Plays well with client libraries that use the curly {{ }} syntax (Angular, Ember, Backbone...)</li>
-<li>Layout support, partial support</li>
-<li>Cache support</li>
-</ul><h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+<li>Extremely fast</li>
+<li>All the advantage of (<a href="http://olado.github.io/doT/">doT</a>)</li>
+<li>Layout and partial support</li>
+<li>Uses <code>[[ ]]</code> by default, not clashing with <code>{{ }}</code> (Angular, Ember...)</li>
+<li>Automatic caching in production</li>
+</ul>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>Install with npm</p>
 
-<pre><code>&gt; npm install express-dot-engine --save
-</code></pre>
+<div class="highlight highlight-sh"><pre>$ npm install express-dot-engine --save</pre></div>
 
-<p>Then in your code</p>
+<p>Then set the engine in express</p>
 
-<pre><code>var engine = require('express-dot-engine');
-var express = require('express');
-var path = require('path');
+<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> engine <span class="pl-ko">=</span> <span class="pl-sf">require</span>(<span class="pl-s1"><span class="pl-pds">'</span>express-dot-engine<span class="pl-pds">'</span></span>);
+...
 
-var app = express();
-
-app.engine('dot', engine.__express);
-app.set('views', path.join(__dirname, './views'));
-app.set('view engine', 'dot');
-
-app.get('/', function(req, res){
-  res.render('index', { fromServer: 'Hello from server', });
-});
-
-var server = app.listen(3000, function() {
-  console.log('Listening on port %d', server.address().port);
-});
-</code></pre>
+app.engine(<span class="pl-s1"><span class="pl-pds">'</span>dot<span class="pl-pds">'</span></span>, engine.__express);
+app.set(<span class="pl-s1"><span class="pl-pds">'</span>views<span class="pl-pds">'</span></span>, path.<span class="pl-sf">join</span>(__dirname, <span class="pl-s1"><span class="pl-pds">'</span>./views<span class="pl-pds">'</span></span>));
+app.set(<span class="pl-s1"><span class="pl-pds">'</span>view engine<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>dot<span class="pl-pds">'</span></span>);</pre></div>
 
 <h2>
-<a name="plays-well-with-angular-ember-backbone-etc" class="anchor" href="#plays-well-with-angular-ember-backbone-etc"><span class="octicon octicon-link"></span></a>Plays well with Angular, Ember, Backbone, etc</h2>
+<a id="layout" class="anchor" href="#layout" aria-hidden="true"><span class="octicon octicon-link"></span></a>Layout</h2>
 
-<p>By default, the engine uses [[ ]] instead of {{ }} on the backend. This allows the use of front-end templating libraries that already use {{ }}.</p>
+<p>You can specify the layout using <a href="http://yaml.org/">yaml</a> and refer to the section as you would from a model (e.g. <code>[[= layout.whatever ]]</code>).</p>
 
-<p>If you want to configure this you can change the library settings and doT settings.</p>
-
-<pre><code>engine.setting.layout = /\[\[###([\s\S]+?)\]\]/g;
-engine.settings.dot = {
-  evaluate:    /\[\[([\s\S]+?)\]\]/g,
-  interpolate: /\[\[=([\s\S]+?)\]\]/g,
-  encode:      /\[\[!([\s\S]+?)\]\]/g,
-  use:         /\[\[#([\s\S]+?)\]\]/g,
-  define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
-  conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
-  iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-  varname: 'layout, server',
-  strip: false,
-  append: true,
-  selfcontained: false,
-};
-</code></pre>
-
-<h2>
-<a name="layout" class="anchor" href="#layout"><span class="octicon octicon-link"></span></a>Layout</h2>
+<p>You can also define any extra configurations (like a page title) that are inherited to the master.</p>
 
 <h3>
-<a name="supports-multiple-sections" class="anchor" href="#supports-multiple-sections"><span class="octicon octicon-link"></span></a>Supports multiple sections</h3>
+<a id="multiple-section-support" class="anchor" href="#multiple-section-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Multiple section support</h3>
 
-<p><strong>master.dot</strong></p>
+<p><code>master.dot</code></p>
 
-<pre><code>&lt;!doctype html&gt;
-&lt;html lang="en"&gt;
-  &lt;head&gt;
-    &lt;title&gt;Test page&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    Hello from master.dot &lt;br /&gt;
+<div class="highlight highlight-html"><pre>&lt;!doctype html&gt;
+&lt;<span class="pl-ent">html</span> <span class="pl-eoa">lang</span>=<span class="pl-s1"><span class="pl-pds">"</span>en<span class="pl-pds">"</span></span>&gt;
+  &lt;<span class="pl-ent">head</span>&gt;
+    &lt;<span class="pl-ent">title</span>&gt;[[= layout.title ]]&lt;/<span class="pl-ent">title</span>&gt;
+  &lt;/<span class="pl-ent">head</span>&gt;
+  &lt;<span class="pl-ent">body</span>&gt;
+    Hello from master.dot &lt;<span class="pl-ent">br</span> /&gt;
+    [[= layout.section1 ]] &lt;<span class="pl-ent">br</span> /&gt;
+    [[= layout.section2 ]]
+  &lt;/<span class="pl-ent">body</span>&gt;
+&lt;/<span class="pl-ent">html</span>&gt;</pre></div>
 
-    [[=layout.body]] &lt;br /&gt;
+<p><code>index.dot</code></p>
 
-    [[=layout.body2]]
+<div class="highlight highlight-html"><pre>---
+layout: master.dot
+title: Index page
+---
 
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-
-<p><strong>index.dot</strong></p>
-
-<pre><code>[[###master.dot]]
-
-[[##body:
+[[##section1:
   Hello from index.dot
 #]]
 
-[[##body2:
+[[##section2:
   Hello from index.dot again
-#]]
-</code></pre>
+#]]</pre></div>
+
+<h4>
+<a id="result" class="anchor" href="#result" aria-hidden="true"><span class="octicon octicon-link"></span></a>Result</h4>
+
+<div class="highlight highlight-html"><pre>&lt;!doctype html&gt;
+&lt;<span class="pl-ent">html</span> <span class="pl-eoa">lang</span>=<span class="pl-s1"><span class="pl-pds">"</span>en<span class="pl-pds">"</span></span>&gt;
+  &lt;<span class="pl-ent">head</span>&gt;
+    &lt;<span class="pl-ent">title</span>&gt;Index page&lt;/<span class="pl-ent">title</span>&gt;
+  &lt;/<span class="pl-ent">head</span>&gt;
+  &lt;<span class="pl-ent">body</span>&gt;
+    Hello from master.dot &lt;<span class="pl-ent">br</span> /&gt;
+    Hello from index.dot &lt;<span class="pl-ent">br</span> /&gt;
+    Hello from index.dot again
+  &lt;/<span class="pl-ent">body</span>&gt;
+&lt;/<span class="pl-ent">html</span>&gt;</pre></div>
 
 <h3>
-<a name="supports-cascading-layouts" class="anchor" href="#supports-cascading-layouts"><span class="octicon octicon-link"></span></a>Supports cascading layouts</h3>
+<a id="cascading-layout-support" class="anchor" href="#cascading-layout-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cascading layout support</h3>
 
-<p><strong>master.dot</strong></p>
+<p><code>CEO.dot</code></p>
 
-<pre><code>&lt;!doctype html&gt;
-&lt;html lang="en"&gt;
-  &lt;head&gt;
-    &lt;title&gt;Test page&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    Hello from master.dot &lt;br /&gt;
+<div class="highlight highlight-html"><pre>&lt;!doctype html&gt;
+&lt;<span class="pl-ent">html</span> <span class="pl-eoa">lang</span>=<span class="pl-s1"><span class="pl-pds">"</span>en<span class="pl-pds">"</span></span>&gt;
+  &lt;<span class="pl-ent">head</span>&gt;
+    &lt;<span class="pl-ent">title</span>&gt;[[= layout.title ]]&lt;/<span class="pl-ent">title</span>&gt;
+  &lt;/<span class="pl-ent">head</span>&gt;
+  &lt;<span class="pl-ent">body</span>&gt;
+    Hello from CEO.dot &lt;<span class="pl-ent">br</span> /&gt;
+    [[= layout.section ]]
+  &lt;/<span class="pl-ent">body</span>&gt;
+&lt;/<span class="pl-ent">html</span>&gt;</pre></div>
 
-    [[=layout.body]]
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
+<p><code>Boss.dot</code></p>
 
-<p><strong>wife.dot</strong></p>
+<div class="highlight highlight-html"><pre>---
+layout: ceo.dot
+---
 
-<pre><code>[[###master.dot]]
+[[##section:
+  Hello from Boss.dot &lt;<span class="pl-ent">br</span> /&gt;
+  [[=layout.section]]
+#]]</pre></div>
 
-[[##body:
-  Hello from wife.dot
+<p><code>me.dot</code></p>
 
-  [[=layout.body]]
-#]]
-</code></pre>
+<div class="highlight highlight-html"><pre>---
+layout: boss.dot
+title: Page title
+---
 
-<p><strong>index.dot</strong></p>
+[[##section:
+  Hello from me.dot
+#]]</pre></div>
 
-<pre><code>[[###wife.dot]]
+<h4>
+<a id="result-1" class="anchor" href="#result-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Result</h4>
 
-[[##body:
-  Hello from index.dot
-#]]
-</code></pre>
+<div class="highlight highlight-html"><pre>&lt;!doctype html&gt;
+&lt;<span class="pl-ent">html</span> <span class="pl-eoa">lang</span>=<span class="pl-s1"><span class="pl-pds">"</span>en<span class="pl-pds">"</span></span>&gt;
+  &lt;<span class="pl-ent">head</span>&gt;
+    &lt;<span class="pl-ent">title</span>&gt;Boss page&lt;/<span class="pl-ent">title</span>&gt;
+  &lt;/<span class="pl-ent">head</span>&gt;
+  &lt;<span class="pl-ent">body</span>&gt;
+    Hello from CEO.dot &lt;<span class="pl-ent">br</span> /&gt;
+    Hello from Boss.dot &lt;<span class="pl-ent">br</span> /&gt;
+    Hello from me.dot
+  &lt;/<span class="pl-ent">body</span>&gt;
+&lt;/<span class="pl-ent">html</span>&gt;</pre></div>
+
+<h2>
+<a id="partials" class="anchor" href="#partials" aria-hidden="true"><span class="octicon octicon-link"></span></a>Partials</h2>
+
+<p>You can also use doT partials. The path is relative to the path of the current file.</p>
+
+<p><code>index.dot</code></p>
+
+<div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">div</span>&gt;
+  Message from partial: [[#def.partial('partials/hello.dot')]]
+&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
+
+<p><code>partials/hello.dot</code></p>
+
+<div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">span</span>&gt;Hello from partial&lt;/<span class="pl-ent">span</span>&gt;</pre></div>
 
 <h3>
-<a name="supports-partials" class="anchor" href="#supports-partials"><span class="octicon octicon-link"></span></a>Supports Partials</h3>
+<a id="result-2" class="anchor" href="#result-2" aria-hidden="true"><span class="octicon octicon-link"></span></a>Result</h3>
 
-<p>index.dot</p>
-
-<pre><code>&lt;div&gt;
-  My partial says: [[#def.partial('partials/hello.dot')]]
-&lt;/div&gt;
-</code></pre>
-
-<p>partials/hello.dot</p>
-
-<pre><code>&lt;span&gt;Hello from partials/hello.dot&lt;/span&gt;
-</code></pre>
+<div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">div</span>&gt;
+  My partial says: &lt;<span class="pl-ent">span</span>&gt;Hello from partials/hello.dot&lt;/<span class="pl-ent">span</span>&gt;
+&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
 
 <h2>
-<a name="server-model" class="anchor" href="#server-model"><span class="octicon octicon-link"></span></a>Server model</h2>
+<a id="server-model" class="anchor" href="#server-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Server model</h2>
 
-<p>In your application, you can render the view by calling</p>
+<p>In your node application, the model passed to the engine will be available through <code>[[= model. ]]</code> in your template.</p>
 
-<p><strong>index.js</strong>
-    app.get('/', function(req, res){
-      res.render('index', { fromServer: 'Hello from server', });
-    });</p>
+<div class="highlight highlight-javascript"><pre>app.get(<span class="pl-s1"><span class="pl-pds">'</span>/<span class="pl-pds">'</span></span>, <span class="pl-s">function</span>(<span class="pl-vpf">req</span>, <span class="pl-vpf">res</span>){
+  res.render(<span class="pl-s1"><span class="pl-pds">'</span>index<span class="pl-pds">'</span></span>, { fromServer<span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">'</span>Hello from server<span class="pl-pds">'</span></span>, });
+});</pre></div>
 
-<p>On the view, you can access the model by calling</p>
+<div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">div</span>&gt;
+  Server says: [[= model.fromServer ]]
+&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
 
-<p><strong>index.dot</strong>
-    Server says: [[=server.fromServer]]</p>
+<h3>
+<a id="result-3" class="anchor" href="#result-3" aria-hidden="true"><span class="octicon octicon-link"></span></a>Result</h3>
 
-<p>Partials and master layouts also has access to the server models.</p>
+<div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">div</span>&gt;
+  Server says: Hello from server
+&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
+
+<h3>
+<a id="layouts-and-partials-also-has-access-to-the-server-models" class="anchor" href="#layouts-and-partials-also-has-access-to-the-server-models" aria-hidden="true"><span class="octicon octicon-link"></span></a>Layouts and Partials also has access to the server models.</h3>
 
 <h2>
-<a name="caching" class="anchor" href="#caching"><span class="octicon octicon-link"></span></a>Caching</h2>
+<a id="settings" class="anchor" href="#settings" aria-hidden="true"><span class="octicon octicon-link"></span></a>Settings</h2>
 
-<p>Caching is enabled when express is running in production via the 'view cache' variable in express. This is done automatically. If you want to enable cache in development, you can add this
-    app.set('view cache', true);</p>
+<p>By default, the engine uses <code>[[ ]]</code> instead of <code>{{ }}</code> on the backend. This allows the use of front-end templating libraries that already use <code>{{ }}</code>.</p>
+
+<p>If you want to configure this you can change the exposed <a href="http://olado.github.io/doT/">doT settings</a>.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-c"><span class="pl-pdc">//</span> doT settings</span>
+engine.settings.dot <span class="pl-ko">=</span> {
+  evaluate<span class="pl-ko">:</span><span class="pl-sr">    <span class="pl-pds">/</span><span class="pl-cce">\[\[</span>(<span class="pl-c1">[<span class="pl-c1">\s\S</span>]</span><span class="pl-ko">+?</span>)<span class="pl-cce">\]\]</span><span class="pl-pds">/</span>g</span>,
+  interpolate<span class="pl-ko">:</span><span class="pl-sr"> <span class="pl-pds">/</span><span class="pl-cce">\[\[</span>=(<span class="pl-c1">[<span class="pl-c1">\s\S</span>]</span><span class="pl-ko">+?</span>)<span class="pl-cce">\]\]</span><span class="pl-pds">/</span>g</span>,
+  encode<span class="pl-ko">:</span><span class="pl-sr">      <span class="pl-pds">/</span><span class="pl-cce">\[\[</span>!(<span class="pl-c1">[<span class="pl-c1">\s\S</span>]</span><span class="pl-ko">+?</span>)<span class="pl-cce">\]\]</span><span class="pl-pds">/</span>g</span>,
+  use<span class="pl-ko">:</span><span class="pl-sr">         <span class="pl-pds">/</span><span class="pl-cce">\[\[</span>#(<span class="pl-c1">[<span class="pl-c1">\s\S</span>]</span><span class="pl-ko">+?</span>)<span class="pl-cce">\]\]</span><span class="pl-pds">/</span>g</span>,
+  define<span class="pl-ko">:</span><span class="pl-sr">      <span class="pl-pds">/</span><span class="pl-cce">\[\[</span>##<span class="pl-c1">\s</span><span class="pl-ko">*</span>(<span class="pl-c1">[<span class="pl-c1">\w</span><span class="pl-cce">\.</span>$]</span><span class="pl-ko">+</span>)<span class="pl-c1">\s</span><span class="pl-ko">*</span>(<span class="pl-cce">\:</span><span class="pl-ko">|</span>=)(<span class="pl-c1">[<span class="pl-c1">\s\S</span>]</span><span class="pl-ko">+?</span>)#<span class="pl-cce">\]\]</span><span class="pl-pds">/</span>g</span>,
+  conditional<span class="pl-ko">:</span><span class="pl-sr"> <span class="pl-pds">/</span><span class="pl-cce">\[\[\?</span>(<span class="pl-cce">\?</span>)<span class="pl-ko">?</span><span class="pl-c1">\s</span><span class="pl-ko">*</span>(<span class="pl-c1">[<span class="pl-c1">\s\S</span>]</span><span class="pl-ko">*?</span>)<span class="pl-c1">\s</span><span class="pl-ko">*</span><span class="pl-cce">\]\]</span><span class="pl-pds">/</span>g</span>,
+  iterate<span class="pl-ko">:</span><span class="pl-sr">     <span class="pl-pds">/</span><span class="pl-cce">\[\[</span>~<span class="pl-c1">\s</span><span class="pl-ko">*</span>(?:<span class="pl-cce">\]\]</span><span class="pl-ko">|</span>(<span class="pl-c1">[<span class="pl-c1">\s\S</span>]</span><span class="pl-ko">+?</span>)<span class="pl-c1">\s</span><span class="pl-ko">*</span><span class="pl-cce">\:</span><span class="pl-c1">\s</span><span class="pl-ko">*</span>(<span class="pl-c1">[<span class="pl-c1">\w</span>$]</span><span class="pl-ko">+</span>)<span class="pl-c1">\s</span><span class="pl-ko">*</span>(?:<span class="pl-cce">\:</span><span class="pl-c1">\s</span><span class="pl-ko">*</span>(<span class="pl-c1">[<span class="pl-c1">\w</span>$]</span><span class="pl-ko">+</span>))<span class="pl-ko">?</span><span class="pl-c1">\s</span><span class="pl-ko">*</span><span class="pl-cce">\]\]</span>)<span class="pl-pds">/</span>g</span>,
+  varname<span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">'</span>layout, model<span class="pl-pds">'</span></span>,
+  strip<span class="pl-ko">:</span> <span class="pl-c1">false</span>,
+  append<span class="pl-ko">:</span> <span class="pl-c1">true</span>,
+  selfcontained<span class="pl-ko">:</span> <span class="pl-c1">false</span>,
+};</pre></div>
 
 <h2>
-<a name="how-to-run-the-examples" class="anchor" href="#how-to-run-the-examples"><span class="octicon octicon-link"></span></a>How to run the examples</h2>
+<a id="caching" class="anchor" href="#caching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caching</h2>
 
-<p>Install express-dot-engine</p>
+<p>Caching is enabled when express is running in production via the 'view cache' variable in express. This is done automatically. If you want to enable cache in development, you can add this</p>
 
-<pre><code>&gt; npm install express-dot-engine
-</code></pre>
+<div class="highlight highlight-javascript"><pre>app.set(<span class="pl-s1"><span class="pl-pds">'</span>view cache<span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>);</pre></div>
 
-<p>Then cd to the directory</p>
+<h2>
+<a id="how-to-run-the-examples" class="anchor" href="#how-to-run-the-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to run the examples</h2>
 
-<pre><code>&gt; cd express-dot-engine
-</code></pre>
+<h3>
+<a id="1-install-express-dot-engine" class="anchor" href="#1-install-express-dot-engine" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. Install express-dot-engine</h3>
 
-<p>Install the example dependencies (yes install express-dot-engine within itself whoa!)</p>
+<div class="highlight highlight-sh"><pre>$ npm install express-dot-engine</pre></div>
 
-<pre><code>&gt; npm install express
-&gt; npm install express-dot-engine
-</code></pre>
+<h3>
+<a id="2-install-express" class="anchor" href="#2-install-express" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. Install express</h3>
 
-<p>Then run the example you want</p>
+<div class="highlight highlight-sh"><pre>$ npm install express</pre></div>
 
-<pre><code>&gt; node examples/simple
-</code></pre>
+<h3>
+<a id="3-run-the-example" class="anchor" href="#3-run-the-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>3. Run the example</h3>
 
-<p>or</p>
+<div class="highlight highlight-sh"><pre>$ node node_module/express-dot-engine/examples</pre></div>
 
-<pre><code>&gt; node examples/cascade
-</code></pre>
+<p>Open your browser to <code>http://localhost:2015</code></p>
 
-<p>or</p>
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
 
-<pre><code>&gt; node examples/partials
-</code></pre>
+<p><a href="LICENSE">MIT</a></p>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Express-dot-engine maintained by <a href="https://github.com/danlevan">danlevan</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/danlevan">danlevan</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
@@ -264,7 +286,6 @@ engine.settings.dot = {
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
-
 
   </body>
 </html>
