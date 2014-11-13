@@ -6,11 +6,26 @@
 
 ## Features
 
-* Extremely fast
-* All the advantage of ([doT](http://olado.github.io/doT/))
-* Layout and partial support
-* Uses `[[ ]]` by default, not clashing with `{{ }}` (Angular, Ember...)
-* Automatic caching in production
+- extremely fast ([see jsperf](http://jsperf.com/dom-vs-innerhtml-based-templating/998))
+- all the advantage of [doT](http://olado.github.io/doT/)
+- layout and partial support
+- uses `[[ ]]` by default, not clashing with `{{ }}` (Angular, Ember...)
+- custom helpers to your views
+- conditional, array iterators, custom delimiters...
+- use it as logic-less or with logic, it is up to you
+- use it also for your email (or anything) templates
+- automatic caching in production
+
+### Great for
+
+- √ Purists that wants html as their templates but with full access to javascript
+- √ Minimum server-side logic, passing server models to client-side frameworks like Angular, Ember, Backbone...
+- √ Clean and fast templating with support for layouts and partials
+- √ Email templating
+
+Not so much for
+- X Jade style lovers (http://jade-lang.com/)
+- X Full blown templating with everything already coded for you (you can however provide any custom functions to your views)
 
 ## Installation
 
@@ -31,7 +46,7 @@ app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'dot');
 ```
 
-## doT template
+## Settings
 
 By default, the engine uses `[[ ]]` instead of `{{ }}` on the backend. This allows the use of front-end templating libraries that already use `{{ }}`.
 
@@ -66,7 +81,7 @@ engine.settings.dot = {
 
 ## Layout
 
-You can specify the layout using [yaml](http://yaml.org/) and refer to the section as you would from a model (e.g. `[[= layout.whatever ]]`).
+You can specify the layout using [yaml](http://yaml.org/) and refer to the section as you would from a model.
 
 You can also define any extra configurations (like a page title) that are inherited to the master.
 
@@ -145,7 +160,7 @@ layout: ceo.dot
 
 [[##section:
   Hello from Boss.dot <br />
-  [[=layout.section]]
+  [[= layout.section ]]
 #]]
 ```
 
@@ -185,7 +200,7 @@ You can also use doT partials. The path is relative to the path of the current f
 
 ```html
 <div>
-  Message from partial: [[#def.partial('partials/hello.dot')]]
+  Message from partial: [[# def.partial('partials/hello.dot') ]]
 </div>
 ```
 
@@ -199,20 +214,22 @@ You can also use doT partials. The path is relative to the path of the current f
 
 ```html
 <div>
-  My partial says: <span>Hello from partials/hello.dot</span>
+  My partial says: <span>Hello from partial</span>
 </div>
 ```
 
 ## Server model
 
-In your node application, the model passed to the engine will be available through `[[= model. ]]` in your template.
+In your node application, the model passed to the engine will be available through `[[= model. ]]` in your template. Layouts and Partials also has access to the server models.
 
+`server.js`
 ```javascript
 app.get('/', function(req, res){
   res.render('index', { fromServer: 'Hello from server', });
 });
 ```
 
+`view.dot`
 ```html
 <div>
   Server says: [[= model.fromServer ]]
@@ -227,7 +244,96 @@ app.get('/', function(req, res){
 </div>
 ```
 
-### Layouts and Partials also has access to the server models.
+> Pro tip
+
+If you want to make the whole model available in the client (to use in angular for example), you can render the model as JSON in a variable on the view.
+
+```html
+<script>
+  var model = [[= JSON.stringify(model) ]];
+</script>
+```
+
+## Helper
+
+You can provide custom helper properties or methods to your views.
+
+`server`
+
+```javascript
+var engine = require('express-dot-engine');
+
+engine.helper.myHelperProperty = 'Hello from server property helper';
+
+engine.helper.myHelperMethod = function(param) {
+
+  // you have access to the server model
+  var message = this.model.fromServer;
+
+  // .. any logic you want
+  return 'Server model: ' + message;
+}
+
+...
+
+app.get('/', function(req, res) {
+  res.render('helper/index', { fromServer: 'Hello from server', });
+});
+
+```
+
+`view`
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Helper example</title>
+  </head>
+  <body>
+
+    model: [[= model.fromServer ]] <br />
+    helper property: [[# def.myHelperProperty ]] <br />
+    helper method: [[# def.myHelperMethod('Hello as a parameter') ]] <br />
+    helper in view: [[# def.helperInView ]]
+
+  </body>
+</html>
+
+[[##def.helperInView:
+  Hello from view helper ([[= model.fromServer ]])
+#]]
+
+```
+
+## Templating for email (or anything)
+
+- `render(filename, model, [callback])`
+- `renderString(templateStr, model, [callback])`
+
+The callback is optional. The callback is in node style `function(err, result) {}`
+
+Example
+```javascript
+var engine = require('express-dot-engine');
+var model = { message: 'Hello', };
+
+// render from a file
+var rendered = engine.render('path/to/file', model);
+email.send('Subject', rendered);
+
+// async render from template string
+engine.renderString(
+  '<div>[[= model.message ]]</div>',
+  model,
+  function(err, rendered) {
+    email.send('Subject', rendered);
+  }
+);
+
+...
+```
+
 
 ## Caching
 
@@ -258,6 +364,11 @@ $ node node_module/express-dot-engine/examples
 ```
 
 Open your browser to `http://localhost:2015`
+
+## Roadmap
+
+- Html minification in prod
+- Automatically remove server-side comments
 
 ## License
 [MIT](LICENSE)

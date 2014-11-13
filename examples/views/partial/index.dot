@@ -5,7 +5,7 @@
   </head>
   <body>
     <div>
-      Message from partial: [[#def.partial('partials/hello.dot')]]
+      Message from partial: [[# def.partial('partials/hello.dot') ]]
     </div>
   </body>
 </html>

@@ -24,6 +24,19 @@ app.get('/partial', function(req, res) {
   res.render('partial/index');
 });
 
+app.get('/helper', function(req, res) {
+
+  // helper as a property
+  engine.helper.myHelperProperty = 'Hello from server property helper';
+
+  // helper as a method
+  engine.helper.myHelperMethod = function(param) {
+    return 'Hello from server method helper (parameter: ' + param + ', server model: ' + this.model.fromServer + ')';
+  }
+
+  res.render('helper/index', { fromServer: 'Hello from server', });
+});
+
 var server = app.listen(2015, function() {
   console.log('Run the example at http://locahost:%d', server.address().port);
 });

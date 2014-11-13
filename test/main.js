@@ -149,4 +149,79 @@ describe('express-dot-engine', function() {
     });
 
   });
+
+  //////////////////////////////////////////////////////////////////////////////
+  // TEMPLATE
+  //////////////////////////////////////////////////////////////////////////////
+  describe('render', function() {
+
+    it('should work async', function(done) {
+      // prepare
+      mock({
+        'path/views': {
+          'child.dot': 'test-template [[= model.test ]]',
+        },
+      });
+
+      // run
+      engine.render(
+        'path/views/child.dot',
+        { test: 'test-model', },
+        function(err, result) {
+          should(err).not.be.ok;
+          should(result).equal('test-template test-model');
+          done();
+        });
+    });
+
+    it('should work sync', function() {
+      // prepare
+      mock({
+        'path/views': {
+          'child.dot': 'test-template [[= model.test ]]',
+        },
+      });
+
+      // run
+      var result = engine.render(
+        'path/views/child.dot',
+        { test: 'test-model', });
+
+      // result
+      should(result).equal('test-template test-model');
+    });
+
+  });
+
+  //////////////////////////////////////////////////////////////////////////////
+  // TEMPLATE STRING
+  //////////////////////////////////////////////////////////////////////////////
+  describe('renderString', function() {
+
+    it('should work async', function(done) {
+
+      // run
+      engine.renderString(
+        'test-template [[= model.test ]]',
+        { test: 'test-model', },
+        function(err, result) {
+          should(err).not.be.ok;
+          should(result).equal('test-template test-model');
+          done();
+        });
+    });
+
+    it('should work sync', function() {
+
+      // run
+      var result = engine.renderString(
+        'test-template [[= model.test ]]',
+        { test: 'test-model', });
+
+      // result
+      should(result).equal('test-template test-model');
+    });
+
+  });
+
 });

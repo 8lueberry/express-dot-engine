@@ -46,10 +46,10 @@ var cache = {
 /**
  * Server-side helper
  */
-var dotDef = {
+var def = {
 
   // injected
-  options: { },
+  model: {},
 
   // the current directory
   dirname: '',
@@ -58,11 +58,11 @@ var dotDef = {
   partial: function(partialPath) {
 
     var template = getTemplate(
-      path.join(this.dirname || this.options.settings.views, partialPath),
-      this.options
+      path.join(this.dirname || this.model.settings.views, partialPath),
+      this.model
     );
 
-    return template.render({}, this.options);
+    return template.render({}, this.model);
 	},
 };
 
@@ -93,15 +93,15 @@ function Template(options) {
 
   // build the doT templates
 
-  dotDef.options = options.engine;
-  dotDef.dirname = options.dirname;
+  def.model = options.options;
+  def.dirname = options.dirname;
 
   // build the templates
   for (var key in options.sections) {
     this.templates[key] = dot.template(
       options.sections[key],
       settings.dot,
-      dotDef
+      def
     );
   }
 }
@@ -166,7 +166,7 @@ Template.prototype.render = function(layout, model, callback) {
 function getTemplate(filename, options, callback) {
 
   // cache
-  if (options.cache) {
+  if (options && options.cache) {
     var fromCache = cache.get(filename);
     if (fromCache) {
       //console.log('cache hit');
@@ -181,7 +181,7 @@ function getTemplate(filename, options, callback) {
   function done(err, template) {
 
     // cache
-    if (options.cache && template) {
+    if (options && options.cache && template) {
       cache.set(filename, template);
     }
 
@@ -265,7 +265,7 @@ function builtTemplateFromString(str, filename, options) {
   }
 
   return new Template({
-    engine: options,
+    options: options,
     config: config,
     sections: sections,
     dirname: path.dirname(filename),
@@ -273,23 +273,47 @@ function builtTemplateFromString(str, filename, options) {
 }
 
 /**
- * Express view engine
- * @param {String} filename
+ * Render a template
+ * @param {String} filename The path to the file
  * @param {Object} options The model to pass to the view
- * @param {Function} callback The async node style callback
+ * @param {Function} callback (Optional) The async node style callback
  */
-function engine(filename, options, callback) {
-  getTemplate(filename, options, function(err, template) {
-    if (err) {
-      return callback(err);
-    }
+function render(filename, options, callback) {
+  var isAsync = callback && typeof callback === 'function';
 
-    template.render({}, options, callback);
-  });
+  if (isAsync) {
+    getTemplate(filename, options, function(err, template) {
+      if (err) {
+        return callback(err);
+      }
+
+      template.render({}, options, callback);
+    });
+
+    return;
+  }
+
+  // sync
+  var template = getTemplate(filename, options);
+  return template.render({}, options);
+}
+
+/**
+ * Render directly from a string
+ * @param {String} templateString The template string
+ * @param {Object} options The model to pass to the view
+ * @param {Function} callback (Optional) The async node style callback
+ */
+function renderString(templateString, options, callback) {
+  var template = builtTemplateFromString(templateString, '', options);
+  return template.render({}, options, callback);
 }
 
 module.exports = {
-  __express: engine,
+  __express: render,
+  render: render,
+  renderString: renderString,
   cache: cache,
   settings: settings,
+  helper: def,
 };

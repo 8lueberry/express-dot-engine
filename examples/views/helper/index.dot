@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Helper example</title>
+  </head>
+  <body>
+
+    model: [[= model.fromServer ]] <br />
+    helper property: [[# def.myHelperProperty ]] <br />
+    helper method: [[# def.myHelperMethod('Hello as a parameter') ]] <br />
+    helper in view: [[# def.myHelperInView ]]
+
+  </body>
+</html>
+
+[[##def.myHelperInView:
+  Hello from view helper ([[= model.fromServer ]])
+#]]

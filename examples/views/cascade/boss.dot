@@ -4,5 +4,5 @@ layout: ceo.dot
 
 [[##section:
   Hello from Boss.dot <br />
-  [[=layout.section]]
+  [[= layout.section ]]
 #]]
