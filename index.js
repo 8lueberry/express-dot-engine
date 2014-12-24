@@ -62,7 +62,7 @@ var def = {
       this.model
     );
 
-    return template.render({}, this.model);
+    return template.render({});
 	},
 };
 
@@ -86,13 +86,29 @@ function Template(options) {
   this.options = options;
   this.templates = {};
   this.isLayout = !!options.config.layout;
+  this.settings = _.clone(settings.dot);
+  this.model = [{}, options.options];
+
+  // dynamically add view data
+  if (_.has(options.options, 'settings')
+    && _.has(options.options.settings, 'view data')
+  ) {
+    this.settings.varname = _.reduce(
+      options.options.settings['view data'],
+      function(result, value, key) {
+        this.model.push(value);
+        return result + ', ' + key;
+      },
+      settings.dot.varname,
+      this
+    );
+  }
 
   if (this.isLayout) {
     this.master = path.join(options.dirname, options.config.layout);
   }
 
   // build the doT templates
-
   def.model = options.options;
   def.dirname = options.dirname;
 
@@ -100,7 +116,7 @@ function Template(options) {
   for (var key in options.sections) {
     this.templates[key] = dot.template(
       options.sections[key],
-      settings.dot,
+      this.settings,
       def
     );
   }
@@ -113,17 +129,18 @@ function Template(options) {
  * @param {Object} model The model to pass to the view
  * @param {Function} callback (Optional) The async node style callback
  */
-Template.prototype.render = function(layout, model, callback) {
+Template.prototype.render = function(layout, callback) {
   var isAsync = callback && typeof callback === 'function';
 
   var layoutModel = _.merge({}, this.options.config, layout);
+  this.model[0] = layoutModel;
 
   // render the sections
   try {
     for (var key in this.templates) {
-      layoutModel[key] = this.templates[key](
-        layoutModel,
-        model
+      layoutModel[key] = this.templates[key].apply(
+        this.templates[key],
+        this.model
       );
     }
   }
@@ -140,18 +157,18 @@ Template.prototype.render = function(layout, model, callback) {
 
   // render the master sync
   if (!isAsync) {
-    var masterTemplate = getTemplate(this.master, model);
-    return masterTemplate.render(layoutModel, model);
+    var masterTemplate = getTemplate(this.master, this.options.options);
+    return masterTemplate.render(layoutModel);
   }
 
   // render the master async
-  getTemplate(this.master, model, function(err, masterTemplate) {
+  getTemplate(this.master, this.options.options, function(err, masterTemplate) {
     if (err) {
       callback(err);
       return;
     }
 
-    return masterTemplate.render(layoutModel, model, callback);
+    return masterTemplate.render(layoutModel, callback);
   });
 };
 
@@ -287,7 +304,7 @@ function render(filename, options, callback) {
         return callback(err);
       }
 
-      template.render({}, options, callback);
+      template.render({}, callback);
     });
 
     return;
@@ -295,7 +312,7 @@ function render(filename, options, callback) {
 
   // sync
   var template = getTemplate(filename, options);
-  return template.render({}, options);
+  return template.render({});
 }
 
 /**
@@ -306,7 +323,7 @@ function render(filename, options, callback) {
  */
 function renderString(templateString, options, callback) {
   var template = builtTemplateFromString(templateString, '', options);
-  return template.render({}, options, callback);
+  return template.render({}, callback);
 }
 
 module.exports = {

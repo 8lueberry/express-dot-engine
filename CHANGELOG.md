@@ -1,3 +1,6 @@
+# 1.0.0
+- Reads the 'view data' settings from express and make it available [[= foo ]]
+
 # 0.2.1
 - Supports custom helper
 - Exposed method for email templating (or anything)
