@@ -1,3 +1,7 @@
+# 1.0.1
+- Fix the cache in production
+- Partial to be supported with caching on (new syntax structure)
+
 # 1.0.0
 - Reads the 'view data' settings from express and make it available [[= foo ]]
 

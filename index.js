@@ -19,7 +19,7 @@ var settings = {
     define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
     conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
     iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-    varname: 'layout, model',
+    varname: 'layout, partial, model',
     strip: false,
     append: true,
     selfcontained: false,
@@ -46,24 +46,29 @@ var cache = {
 /**
  * Server-side helper
  */
-var def = {
+function DotDef(options) {
+  this.options = options;
+  this.dirname = options.dirname;
+  this.model = options;
+}
 
-  // injected
-  model: {},
+DotDef.prototype = {
 
-  // the current directory
-  dirname: '',
-
-  // supports partial
   partial: function(partialPath) {
+
+    console.log('DEPRECATED: ' +
+      'Please use the new syntax for partials' +
+      ' [[= partial(\'path/to/partial\') ]]'
+    );
 
     var template = getTemplate(
       path.join(this.dirname || this.model.settings.views, partialPath),
       this.model
     );
 
-    return template.render({});
-	},
+    return template.render({}, this.model);
+  },
+
 };
 
 /**
@@ -84,19 +89,27 @@ var def = {
  */
 function Template(options) {
   this.options = options;
-  this.templates = {};
-  this.isLayout = !!options.config.layout;
-  this.settings = _.clone(settings.dot);
-  this.model = [{}, options.options];
 
-  // dynamically add view data
-  if (_.has(options.options, 'settings')
-    && _.has(options.options.settings, 'view data')
+  // layout
+  this.isLayout = !!options.config.layout;
+  this.master = this.isLayout ?
+    path.join(options.dirname, options.config.layout) :
+    null;
+
+  // build the doT templates
+  this.templates = {};
+  this.settings = _.clone(settings.dot);
+  this.def = new DotDef(options);
+
+  // view data
+  this.viewData = [];
+  if (_.has(options.express, 'settings')
+    && _.has(options.express.settings, 'view data')
   ) {
     this.settings.varname = _.reduce(
-      options.options.settings['view data'],
+      options.express.settings['view data'],
       function(result, value, key) {
-        this.model.push(value);
+        this.viewData.push(value);
         return result + ', ' + key;
       },
       settings.dot.varname,
@@ -104,22 +117,28 @@ function Template(options) {
     );
   }
 
-  if (this.isLayout) {
-    this.master = path.join(options.dirname, options.config.layout);
-  }
-
-  // build the doT templates
-  def.model = options.options;
-  def.dirname = options.dirname;
-
-  // build the templates
   for (var key in options.sections) {
     this.templates[key] = dot.template(
       options.sections[key],
       this.settings,
-      def
+      this.def
     );
   }
+}
+
+/**
+ * Partial method helper
+ * @param {Object} model The model to pass to the view
+ */
+Template.prototype.createPartialHelper = function(model) {
+  return function(partialPath) {
+    var template = getTemplate(
+      path.join(this.options.dirname || this.options.express.settings.views, partialPath),
+      this.options.express
+    );
+
+    return template.render({}, model);
+  }.bind(this);
 }
 
 /**
@@ -129,24 +148,32 @@ function Template(options) {
  * @param {Object} model The model to pass to the view
  * @param {Function} callback (Optional) The async node style callback
  */
-Template.prototype.render = function(layout, callback) {
+Template.prototype.render = function(layout, model, callback) {
   var isAsync = callback && typeof callback === 'function';
 
   var layoutModel = _.merge({}, this.options.config, layout);
-  this.model[0] = layoutModel;
 
   // render the sections
-  try {
-    for (var key in this.templates) {
+  for (var key in this.templates) {
+    try {
       layoutModel[key] = this.templates[key].apply(
         this.templates[key],
-        this.model
+        _.union(
+          [ layoutModel, this.createPartialHelper(model), model ],
+          this.viewData
+        )
       );
     }
-  }
-  catch(err) {
-    if (isAsync) { callback(err); return; }
-    throw err;
+    catch(err) {
+      var error = new Error(
+        'Failed to render with doT' +
+        ' (' + this.options.filename + ')' +
+        ' - ' + err.toString()
+      );
+
+      if (isAsync) { callback(error); return; }
+      throw error;
+    }
   }
 
   // no layout
@@ -157,18 +184,18 @@ Template.prototype.render = function(layout, callback) {
 
   // render the master sync
   if (!isAsync) {
-    var masterTemplate = getTemplate(this.master, this.options.options);
-    return masterTemplate.render(layoutModel);
+    var masterTemplate = getTemplate(this.master, this.options.express);
+    return masterTemplate.render(layoutModel, model);
   }
 
   // render the master async
-  getTemplate(this.master, this.options.options, function(err, masterTemplate) {
+  getTemplate(this.master, this.options.express, function(err, masterTemplate) {
     if (err) {
       callback(err);
       return;
     }
 
-    return masterTemplate.render(layoutModel, callback);
+    return masterTemplate.render(layoutModel, model, callback);
   });
 };
 
@@ -211,11 +238,11 @@ function getTemplate(filename, options, callback) {
 
   // sync
   if (!isAsync) {
-    return done(null, buildTemplate(filename, options));
+    return done(null, buildTemplateFromFile(filename, options));
   }
 
   // async
-  buildTemplate(filename, options, done);
+  buildTemplateFromFile(filename, options, done);
 }
 
 /**
@@ -225,7 +252,7 @@ function getTemplate(filename, options, callback) {
  * @param {Object} options The options sent by express
  * @param {Function} callback (Optional) The async node style callback
  */
-function buildTemplate(filename, options, callback) {
+function buildTemplateFromFile(filename, options, callback) {
   var isAsync = callback && typeof callback === 'function';
 
   // sync
@@ -281,12 +308,24 @@ function builtTemplateFromString(str, filename, options) {
     });
   }
 
-  return new Template({
-    options: options,
-    config: config,
-    sections: sections,
-    dirname: path.dirname(filename),
-  });
+  try {
+    return new Template({
+      express: _.pick(options, ['settings']),
+      config: config,
+      sections: sections,
+      dirname: path.dirname(filename),
+      filename: filename,
+    });
+  }
+  catch(err) {
+    var error = new Error(
+      'Failed to build template' +
+      ' (' + filename + ')' +
+      ' - ' + err.toString()
+    );
+
+    throw error;
+  }
 }
 
 /**
@@ -298,21 +337,27 @@ function builtTemplateFromString(str, filename, options) {
 function render(filename, options, callback) {
   var isAsync = callback && typeof callback === 'function';
 
-  if (isAsync) {
-    getTemplate(filename, options, function(err, template) {
-      if (err) {
-        return callback(err);
-      }
-
-      template.render({}, callback);
-    });
-
-    return;
+  if (!isAsync) {
+    return renderSync(filename, options)
   }
 
-  // sync
+  getTemplate(filename, options, function(err, template) {
+    if (err) {
+      return callback(err);
+    }
+
+    template.render({}, options, callback);
+  });
+}
+
+/**
+ * Renders a template sync
+ * @param {String} filename The path to the file
+ * @param {Object} options The model to pass to the view
+ */
+function renderSync(filename, options) {
   var template = getTemplate(filename, options);
-  return template.render({});
+  return template.render({}, options);
 }
 
 /**
@@ -323,7 +368,7 @@ function render(filename, options, callback) {
  */
 function renderString(templateString, options, callback) {
   var template = builtTemplateFromString(templateString, '', options);
-  return template.render({}, callback);
+  return template.render({}, options, callback);
 }
 
 module.exports = {
@@ -332,5 +377,5 @@ module.exports = {
   renderString: renderString,
   cache: cache,
   settings: settings,
-  helper: def,
+  helper: DotDef.prototype,
 };

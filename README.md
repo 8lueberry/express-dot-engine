@@ -4,6 +4,10 @@
 
 > Node.js engine using the ultra fast [doT](http://olado.github.io/doT/) templating with support for layouts, partials. It's friendly for front-end web libraries (Angular, Ember, Backbone...)
 
+## Important
+
+The default settings of doT has been change to use `[[ ]]` instead of `{{ }}`. This is to support client side templates (Angular, Ember, ...). You can change it back by changing the Settings (see below).
+
 ## Features
 
 - extremely fast ([see jsperf](http://jsperf.com/dom-vs-innerhtml-based-templating/998))
@@ -23,9 +27,10 @@
 - √ Clean and fast templating with support for layouts and partials
 - √ Email templating
 
-Not so much for
-- X Jade style lovers (http://jade-lang.com/)
-- X Full blown templating with everything already coded for you (you can however provide any custom functions to your views)
+### Not so much for
+
+- Jade style lovers (http://jade-lang.com/)
+- Full blown templating with everything already coded for you (you can however provide any custom functions to your views)
 
 ## Installation
 
@@ -194,13 +199,13 @@ title: Page title
 
 ## Partials
 
-You can also use doT partials. The path is relative to the path of the current file.
+Partials are supported. The path is relative to the path of the current file.
 
 `index.dot`
 
 ```html
 <div>
-  Message from partial: [[# def.partial('partials/hello.dot') ]]
+  Message from partial: [[= partial('partials/hello.dot') ]]
 </div>
 ```
 
@@ -360,7 +365,7 @@ $ npm install express
 ### 3. Run the example
 
 ```sh
-$ node node_module/express-dot-engine/examples
+$ node examples
 ```
 
 Open your browser to `http://localhost:2015`

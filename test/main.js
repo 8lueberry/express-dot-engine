@@ -60,7 +60,7 @@ describe('express-dot-engine', function() {
       mock({
         'path/views': {
           'partial.dot': 'test-partial [[= model.test ]]',
-          'child.dot': 'test-child [[#def.partial(\'partial.dot\')]]',
+          'child.dot': 'test-child [[=partial(\'partial.dot\')]]',
         },
       });
 
@@ -133,7 +133,7 @@ describe('express-dot-engine', function() {
       mock({
         'path/views': {
           'partial.dot': 'test-partial',
-          'child.dot': 'test-child [[#def.partial(\'partial.dot\')]]',
+          'child.dot': 'test-child [[=partial(\'partial.dot\')]]',
         },
       });
 
@@ -220,6 +220,42 @@ describe('express-dot-engine', function() {
 
       // result
       should(result).equal('test-template test-model');
+    });
+
+  });
+
+  //////////////////////////////////////////////////////////////////////////////
+  // CACHE
+  //////////////////////////////////////////////////////////////////////////////
+  describe('cache', function() {
+
+    it('should work', function(done) {
+      // prepare
+      mock({
+        'path/views': {
+          'child.dot': 'test-child [[= model.test ]]',
+        },
+      });
+
+      // run
+      function test(data, cb) {
+        engine.__express(
+          'path/views/child.dot',
+          {
+            cache: true,
+            test: data,
+          },
+          function(err, result) {
+            should(err).not.be.ok;
+            should(result).equal('test-child ' + data);
+            cb();
+          }
+        );
+      }
+
+      test('test-model1',
+        function() { test('test-model2', done); }
+      );
     });
 
   });
