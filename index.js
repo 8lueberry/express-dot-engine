@@ -10,19 +10,24 @@ var yaml = require('js-yaml');
 var settings = {
 
   config: /^---([\s\S]+?)---/g,
+  comment: /<!--([\s\S]+?)-->/g,
+  header: '',
+
+  stripComment: false,
+  stripWhitespace: false, // shortcut to dot.strip
 
   dot: {
-    evaluate:    /\[\[([\s\S]+?)\]\]/g,
-    interpolate: /\[\[=([\s\S]+?)\]\]/g,
-    encode:      /\[\[!([\s\S]+?)\]\]/g,
-    use:         /\[\[#([\s\S]+?)\]\]/g,
-    define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
-    conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
-    iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-    varname: 'layout, partial, model',
-    strip: false,
-    append: true,
-    selfcontained: false,
+    evaluate:       /\[\[([\s\S]+?)\]\]/g,
+    interpolate:    /\[\[=([\s\S]+?)\]\]/g,
+    encode:         /\[\[!([\s\S]+?)\]\]/g,
+    use:            /\[\[#([\s\S]+?)\]\]/g,
+    define:         /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
+    conditional:    /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
+    iterate:        /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
+    varname:        'layout, partial, model',
+    strip:          false,
+    append:         true,
+    selfcontained:  false,
   },
 };
 
@@ -66,7 +71,7 @@ DotDef.prototype = {
       this.model
     );
 
-    return template.render({}, this.model);
+    return template.render({ model: this.model, isPartial: true, });
   },
 
 };
@@ -137,7 +142,7 @@ Template.prototype.createPartialHelper = function(model) {
       this.options.express
     );
 
-    return template.render({}, model);
+    return template.render({ model: model, isPartial: true, });
   }.bind(this);
 }
 
@@ -148,8 +153,11 @@ Template.prototype.createPartialHelper = function(model) {
  * @param {Object} model The model to pass to the view
  * @param {Function} callback (Optional) The async node style callback
  */
-Template.prototype.render = function(layout, model, callback) {
+Template.prototype.render = function(options, callback) {
   var isAsync = callback && typeof callback === 'function';
+
+  var layout = options.layout
+  var model = options.model;
 
   var layoutModel = _.merge({}, this.options.config, layout);
 
@@ -178,14 +186,18 @@ Template.prototype.render = function(layout, model, callback) {
 
   // no layout
   if (!this.isLayout) {
-    if (isAsync) { callback(null, layoutModel.body); }
-    return layoutModel.body;
+
+    // append the header to the master page
+    var result = (!options.isPartial ? settings.header : '') + layoutModel.body;
+
+    if (isAsync) { callback(null, result); }
+    return result;
   }
 
   // render the master sync
   if (!isAsync) {
     var masterTemplate = getTemplate(this.master, this.options.express);
-    return masterTemplate.render(layoutModel, model);
+    return masterTemplate.render({ layout: layoutModel, model: model});
   }
 
   // render the master async
@@ -195,7 +207,7 @@ Template.prototype.render = function(layout, model, callback) {
       return;
     }
 
-    return masterTemplate.render(layoutModel, model, callback);
+    return masterTemplate.render({ layout: layoutModel, model: model }, callback);
   });
 };
 
@@ -296,6 +308,18 @@ function builtTemplateFromString(str, filename, options) {
     config = yaml.safeLoad(conf);
   });
 
+  // strip comments
+  if (settings.stripComment) {
+    str = str.replace(settings.comment, function(m, code, assign, value) {
+      return '';
+    });
+  }
+
+  // strip whitespace
+  if (settings.stripWhitespace) {
+    settings.dot.strip = settings.stripWhitespace;
+  }
+
   // layout sections
   var sections = {};
 
@@ -346,7 +370,7 @@ function render(filename, options, callback) {
       return callback(err);
     }
 
-    template.render({}, options, callback);
+    template.render({ model: options, }, callback);
   });
 }
 
@@ -357,7 +381,7 @@ function render(filename, options, callback) {
  */
 function renderSync(filename, options) {
   var template = getTemplate(filename, options);
-  return template.render({}, options);
+  return template.render({ model: options, });
 }
 
 /**
@@ -368,7 +392,7 @@ function renderSync(filename, options) {
  */
 function renderString(templateString, options, callback) {
   var template = builtTemplateFromString(templateString, '', options);
-  return template.render({}, options, callback);
+  return template.render({ model: options, }, callback);
 }
 
 module.exports = {

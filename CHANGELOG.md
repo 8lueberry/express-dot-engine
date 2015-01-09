@@ -1,3 +1,7 @@
+# 1.0.2
+- Whitespace strip settings
+- Comment strip settings
+
 # 1.0.1
 - Fix the cache in production
 - Partial to be supported with caching on (new syntax structure)
