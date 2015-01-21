@@ -24,7 +24,7 @@ var settings = {
     define:         /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
     conditional:    /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
     iterate:        /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-    varname:        'layout, partial, model',
+    varname:        'layout, partial, locals, model',
     strip:          false,
     append:         true,
     selfcontained:  false,
@@ -122,6 +122,16 @@ function Template(options) {
     );
   }
 
+  // view shortcut
+  this.shortcuts = [];
+  if (_.has(options.express, 'settings')
+    && _.has(options.express.settings, 'view shortcut')
+  ) {
+    this.shortcuts = options.express.settings['view shortcut'];
+    this.settings.varname += ', ' + _.keys(this.shortcuts).join();
+  }
+
+  // doT template
   for (var key in options.sections) {
     this.templates[key] = dot.template(
       options.sections[key],
@@ -164,12 +174,27 @@ Template.prototype.render = function(options, callback) {
   // render the sections
   for (var key in this.templates) {
     try {
+
+      var viewModel = _.union(
+        [
+          layoutModel,
+          this.createPartialHelper(model),
+          options.model._locals || {},
+          model,
+        ],
+        this.viewData,
+        _
+          .chain(this.shortcuts)
+          .keys()
+          .map(function(shortcut) {
+            return options.model._locals[this.shortcuts[shortcut]] || null;
+          }, this)
+          .valueOf()
+      );
+
       layoutModel[key] = this.templates[key].apply(
         this.templates[key],
-        _.union(
-          [ layoutModel, this.createPartialHelper(model), model ],
-          this.viewData
-        )
+        viewModel
       );
     }
     catch(err) {
