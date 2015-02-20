@@ -1,4 +1,7 @@
 # 1.0.3
+- Support > v0.10 node
+
+# 1.0.3
 - Add locals (and shortcut with express options 'view shortcut')
 
 # 1.0.2
