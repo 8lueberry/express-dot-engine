@@ -143,16 +143,17 @@ function Template(options) {
 
 /**
  * Partial method helper
+ * @param {Object} model The layout to pass to the view
  * @param {Object} model The model to pass to the view
  */
-Template.prototype.createPartialHelper = function(model) {
+Template.prototype.createPartialHelper = function(layout, model) {
   return function(partialPath) {
     var template = getTemplate(
       path.join(this.options.dirname || this.options.express.settings.views, partialPath),
       this.options.express
     );
 
-    return template.render({ model: model, isPartial: true, });
+    return template.render({ layout: layout, model: model, isPartial: true, });
   }.bind(this);
 }
 
@@ -178,7 +179,7 @@ Template.prototype.render = function(options, callback) {
       var viewModel = _.union(
         [
           layoutModel,
-          this.createPartialHelper(model),
+          this.createPartialHelper(layoutModel, model),
           options.model._locals || {},
           model,
         ],
