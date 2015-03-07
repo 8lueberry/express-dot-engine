@@ -1,4 +1,7 @@
-# 1.0.3
+# 1.0.5
+- Pass [[=layout]] to the partials
+
+# 1.0.4
 - Support > v0.10 node
 
 # 1.0.3
