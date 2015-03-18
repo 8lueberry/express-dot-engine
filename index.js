@@ -5,10 +5,9 @@ var path = require('path');
 var yaml = require('js-yaml');
 
 /**
- * Engine settings
- */
+* Engine settings
+*/
 var settings = {
-
   config: /^---([\s\S]+?)---/g,
   comment: /<!--([\s\S]+?)-->/g,
   header: '',
@@ -17,23 +16,23 @@ var settings = {
   stripWhitespace: false, // shortcut to dot.strip
 
   dot: {
-    evaluate:       /\[\[([\s\S]+?)\]\]/g,
-    interpolate:    /\[\[=([\s\S]+?)\]\]/g,
-    encode:         /\[\[!([\s\S]+?)\]\]/g,
-    use:            /\[\[#([\s\S]+?)\]\]/g,
-    define:         /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
-    conditional:    /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
-    iterate:        /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-    varname:        'layout, partial, locals, model',
-    strip:          false,
-    append:         true,
-    selfcontained:  false,
-  },
+    evaluate: /\[\[([\s\S]+?)]]/g,
+    interpolate: /\[\[=([\s\S]+?)]]/g,
+    encode: /\[\[!([\s\S]+?)]]/g,
+    use: /\[\[#([\s\S]+?)]]/g,
+    define: /\[\[##\s*([\w\.$]+)\s*(:|=)([\s\S]+?)#]]/g,
+    conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*]]/g,
+    iterate: /\[\[~\s*(?:]]|([\s\S]+?)\s*:\s*([\w$]+)\s*(?::\s*([\w$]+))?\s*]])/g,
+    varname: 'layout, partial, locals, model',
+    strip: false,
+    append: true,
+    selfcontained: false
+  }
 };
 
 /**
- * Cache store
- */
+* Cache store
+*/
 var cache = {
   cache: {},
 
@@ -45,12 +44,12 @@ var cache = {
   },
   clear: function() {
     this.cache = {};
-  },
+  }
 };
 
 /**
- * Server-side helper
- */
+* Server-side helper
+*/
 function DotDef(options) {
   this.options = options;
   this.dirname = options.dirname;
@@ -62,8 +61,8 @@ DotDef.prototype = {
   partial: function(partialPath) {
 
     console.log('DEPRECATED: ' +
-      'Please use the new syntax for partials' +
-      ' [[= partial(\'path/to/partial\') ]]'
+    'Please use the new syntax for partials' +
+    ' [[= partial(\'path/to/partial\') ]]'
     );
 
     var template = getTemplate(
@@ -71,27 +70,27 @@ DotDef.prototype = {
       this.model
     );
 
-    return template.render({ model: this.model, isPartial: true, });
-  },
+    return template.render({ model: this.model, isPartial: true, } );
+  }
 
 };
 
 /**
- * @constructor Template object with a layout structure. This object is cached
- * if the 'options.cache' set by express is true.
- * @param {Object} options The constructor parameters:
- *
- * {Object} engine The option from the engine
- *
- * There are 2 options
- *
- * Case 1: A layout view
- * {String} master The master template filename
- * {Object} sections A key/value containing the sections of the template
- *
- * Case 2: A standalone view
- * {String} body The template string
- */
+* @constructor Template object with a layout structure. This object is cached
+* if the 'options.cache' set by express is true.
+* @param {Object} options The constructor parameters:
+*
+* {Object} engine The option from the engine
+*
+* There are 2 options
+*
+* Case 1: A layout view
+* {String} master The master template filename
+* {Object} sections A key/value containing the sections of the template
+*
+* Case 2: A standalone view
+* {String} body The template string
+*/
 function Template(options) {
   this.options = options;
 
@@ -133,80 +132,93 @@ function Template(options) {
 
   // doT template
   for (var key in options.sections) {
-    this.templates[key] = dot.template(
-      options.sections[key],
-      this.settings,
-      this.def
-    );
+    if (options.sections.hasOwnProperty(key)) {
+      this.templates[key] = dot.template(
+        options.sections[key],
+        this.settings,
+        this.def
+      );
+    }
   }
 }
 
 /**
- * Partial method helper
- * @param {Object} model The layout to pass to the view
- * @param {Object} model The model to pass to the view
- */
+* Partial method helper
+* @param {Object} layout The layout to pass to the view
+* @param {Object} model The model to pass to the view
+*/
 Template.prototype.createPartialHelper = function(layout, model) {
   return function(partialPath) {
+    var args = [].slice.call(arguments, 1);
     var template = getTemplate(
       path.join(this.options.dirname || this.options.express.settings.views, partialPath),
       this.options.express
     );
 
+    if (args.length) {
+      model = _.assign.apply(_, [
+        {},
+        model
+      ].concat(args));
+    }
+
     return template.render({ layout: layout, model: model, isPartial: true, });
   }.bind(this);
-}
+};
 
 /**
- * Renders the template.
- * If callback is passed, it will be called asynchronously.
- * @param {Object} layout The layout key/value
- * @param {Object} model The model to pass to the view
- * @param {Function} callback (Optional) The async node style callback
- */
+* Renders the template.
+* If callback is passed, it will be called asynchronously.
+* @param {Object} options Options to pass to the view
+* @param {Object} [options.layout] The layout key/value
+* @param {Object} options.model The model to pass to the view
+* @param {Function} [callback] (Optional) The async node style callback
+*/
 Template.prototype.render = function(options, callback) {
   var isAsync = callback && typeof callback === 'function';
-
-  var layout = options.layout
+  var layout = options.layout;
   var model = options.model;
-
   var layoutModel = _.merge({}, this.options.config, layout);
 
   // render the sections
   for (var key in this.templates) {
-    try {
+    if (this.templates.hasOwnProperty(key)) {
+      try {
 
-      var viewModel = _.union(
-        [
-          layoutModel,
-          this.createPartialHelper(layoutModel, model),
-          options.model._locals || {},
-          model,
-        ],
-        this.viewData,
-        _
-          .chain(this.shortcuts)
+        var viewModel = _.union(
+          [
+            layoutModel,
+            this.createPartialHelper(layoutModel, model),
+            options.model._locals || {},
+            model
+          ],
+          this.viewData,
+          _.chain(this.shortcuts)
           .keys()
           .map(function(shortcut) {
             return options.model._locals[this.shortcuts[shortcut]] || null;
           }, this)
           .valueOf()
-      );
+        );
 
-      layoutModel[key] = this.templates[key].apply(
-        this.templates[key],
-        viewModel
-      );
-    }
-    catch(err) {
-      var error = new Error(
-        'Failed to render with doT' +
-        ' (' + this.options.filename + ')' +
-        ' - ' + err.toString()
-      );
+        layoutModel[key] = this.templates[key].apply(
+          this.templates[key],
+          viewModel
+        );
+      }
+      catch (err) {
+        var error = new Error(
+          'Failed to render with doT' +
+          ' (' + this.options.filename + ')' +
+          ' - ' + err.toString()
+        );
 
-      if (isAsync) { callback(error); return; }
-      throw error;
+        if (isAsync) {
+          callback(error);
+          return;
+        }
+        throw error;
+      }
     }
   }
 
@@ -216,14 +228,16 @@ Template.prototype.render = function(options, callback) {
     // append the header to the master page
     var result = (!options.isPartial ? settings.header : '') + layoutModel.body;
 
-    if (isAsync) { callback(null, result); }
+    if (isAsync) {
+      callback(null, result);
+    }
     return result;
   }
 
   // render the master sync
   if (!isAsync) {
     var masterTemplate = getTemplate(this.master, this.options.express);
-    return masterTemplate.render({ layout: layoutModel, model: model});
+    return masterTemplate.render({ layout: layoutModel, model: model, });
   }
 
   // render the master async
@@ -233,18 +247,18 @@ Template.prototype.render = function(options, callback) {
       return;
     }
 
-    return masterTemplate.render({ layout: layoutModel, model: model }, callback);
+    return masterTemplate.render({ layout: layoutModel, model: model, }, callback);
   });
 };
 
 /**
- * Retrieves a template given a filename.
- * Uses cache for optimization (if options.cache is true).
- * If callback is passed, it will be called asynchronously.
- * @param {String} filename The path to the template
- * @param {Object} options The option sent by express
- * @param {Function} callback (Optional) The async node style callback
- */
+* Retrieves a template given a filename.
+* Uses cache for optimization (if options.cache is true).
+* If callback is passed, it will be called asynchronously.
+* @param {String} filename The path to the template
+* @param {Object} options The option sent by express
+* @param {Function} [callback] (Optional) The async node style callback
+*/
 function getTemplate(filename, options, callback) {
 
   // cache
@@ -284,12 +298,12 @@ function getTemplate(filename, options, callback) {
 }
 
 /**
- * Builds a template from a file
- * If callback is passed, it will be called asynchronously.
- * @param {String} filename The path to the template
- * @param {Object} options The options sent by express
- * @param {Function} callback (Optional) The async node style callback
- */
+* Builds a template from a file
+* If callback is passed, it will be called asynchronously.
+* @param {String} filename The path to the template
+* @param {Object} options The options sent by express
+* @param {Function} callback (Optional) The async node style callback
+*/
 function buildTemplateFromFile(filename, options, callback) {
   var isAsync = callback && typeof callback === 'function';
 
@@ -312,19 +326,19 @@ function buildTemplateFromFile(filename, options, callback) {
     try {
       callback(null, builtTemplateFromString(str, filename, options));
     }
-    catch(err) {
+    catch (err) {
       callback(err);
     }
   });
 }
 
 /**
- * Builds a template from a string
- * @param {String} str The template string
- * @param {String} filename The path to the template
- * @param {Object} options The options sent by express
- * @return {Template} The template object
- */
+* Builds a template from a string
+* @param {String} str The template string
+* @param {String} filename The path to the template
+* @param {Object} options The options sent by express
+* @return {Template} The template object
+*/
 function builtTemplateFromString(str, filename, options) {
 
   var config = {};
@@ -364,26 +378,24 @@ function builtTemplateFromString(str, filename, options) {
       config: config,
       sections: sections,
       dirname: path.dirname(filename),
-      filename: filename,
+      filename: filename
     });
   }
-  catch(err) {
-    var error = new Error(
+  catch (err) {
+    throw new Error(
       'Failed to build template' +
       ' (' + filename + ')' +
       ' - ' + err.toString()
     );
-
-    throw error;
   }
 }
 
 /**
- * Render a template
- * @param {String} filename The path to the file
- * @param {Object} options The model to pass to the view
- * @param {Function} callback (Optional) The async node style callback
- */
+* Render a template
+* @param {String} filename The path to the file
+* @param {Object} options The model to pass to the view
+* @param {Function} callback (Optional) The async node style callback
+*/
 function render(filename, options, callback) {
   var isAsync = callback && typeof callback === 'function';
 
@@ -401,21 +413,21 @@ function render(filename, options, callback) {
 }
 
 /**
- * Renders a template sync
- * @param {String} filename The path to the file
- * @param {Object} options The model to pass to the view
- */
+* Renders a template sync
+* @param {String} filename The path to the file
+* @param {Object} options The model to pass to the view
+*/
 function renderSync(filename, options) {
   var template = getTemplate(filename, options);
   return template.render({ model: options, });
 }
 
 /**
- * Render directly from a string
- * @param {String} templateString The template string
- * @param {Object} options The model to pass to the view
- * @param {Function} callback (Optional) The async node style callback
- */
+* Render directly from a string
+* @param {String} templateString The template string
+* @param {Object} options The model to pass to the view
+* @param {Function} callback (Optional) The async node style callback
+*/
 function renderString(templateString, options, callback) {
   var template = builtTemplateFromString(templateString, '', options);
   return template.render({ model: options, }, callback);
@@ -427,5 +439,5 @@ module.exports = {
   renderString: renderString,
   cache: cache,
   settings: settings,
-  helper: DotDef.prototype,
+  helper: DotDef.prototype
 };
