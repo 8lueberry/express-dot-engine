@@ -36,13 +36,13 @@ var settings = {
 var cache = {
   cache: {},
 
-  get: function (key) {
+  get: function(key) {
     return this.cache[key];
   },
-  set: function (key, value) {
+  set: function(key, value) {
     this.cache[key] = value;
   },
-  clear: function () {
+  clear: function() {
     this.cache = {};
   }
 };
@@ -58,7 +58,7 @@ function DotDef(options) {
 
 DotDef.prototype = {
 
-  partial: function (partialPath) {
+  partial: function(partialPath) {
 
     console.log('DEPRECATED: ' +
     'Please use the new syntax for partials' +
@@ -70,7 +70,7 @@ DotDef.prototype = {
       this.model
     );
 
-    return template.render({model: this.model, isPartial: true});
+    return template.render({ model: this.model, isPartial: true, );
   }
 
 };
@@ -112,7 +112,7 @@ function Template(options) {
   ) {
     this.settings.varname = _.reduce(
       options.express.settings['view data'],
-      function (result, value, key) {
+      function(result, value, key) {
         this.viewData.push(value);
         return result + ', ' + key;
       },
@@ -147,8 +147,8 @@ function Template(options) {
 * @param {Object} layout The layout to pass to the view
 * @param {Object} model The model to pass to the view
 */
-Template.prototype.createPartialHelper = function (layout, model) {
-  return function (partialPath) {
+Template.prototype.createPartialHelper = function(layout, model) {
+  return function(partialPath) {
     var args = [].slice.call(arguments, 1);
     var template = getTemplate(
       path.join(this.options.dirname || this.options.express.settings.views, partialPath),
@@ -162,7 +162,7 @@ Template.prototype.createPartialHelper = function (layout, model) {
       ].concat(args));
     }
 
-    return template.render({layout: layout, model: model, isPartial: true});
+    return template.render({ layout: layout, model: model, isPartial: true, });
   }.bind(this);
 };
 
@@ -174,7 +174,7 @@ Template.prototype.createPartialHelper = function (layout, model) {
 * @param {Object} options.model The model to pass to the view
 * @param {Function} [callback] (Optional) The async node style callback
 */
-Template.prototype.render = function (options, callback) {
+Template.prototype.render = function(options, callback) {
   var isAsync = callback && typeof callback === 'function';
   var layout = options.layout;
   var model = options.model;
@@ -195,7 +195,7 @@ Template.prototype.render = function (options, callback) {
           this.viewData,
           _.chain(this.shortcuts)
           .keys()
-          .map(function (shortcut) {
+          .map(function(shortcut) {
             return options.model._locals[this.shortcuts[shortcut]] || null;
           }, this)
           .valueOf()
@@ -237,17 +237,17 @@ Template.prototype.render = function (options, callback) {
   // render the master sync
   if (!isAsync) {
     var masterTemplate = getTemplate(this.master, this.options.express);
-    return masterTemplate.render({layout: layoutModel, model: model});
+    return masterTemplate.render({ layout: layoutModel, model: model, });
   }
 
   // render the master async
-  getTemplate(this.master, this.options.express, function (err, masterTemplate) {
+  getTemplate(this.master, this.options.express, function(err, masterTemplate) {
     if (err) {
       callback(err);
       return;
     }
 
-    return masterTemplate.render({layout: layoutModel, model: model}, callback);
+    return masterTemplate.render({ layout: layoutModel, model: model, }, callback);
   });
 };
 
@@ -317,7 +317,7 @@ function buildTemplateFromFile(filename, options, callback) {
   }
 
   // async
-  fs.readFile(filename, 'utf8', function (err, str) {
+  fs.readFile(filename, 'utf8', function(err, str) {
     if (err) {
       callback(new Error('Failed to open view file (' + filename + ')'));
       return;
@@ -344,13 +344,13 @@ function builtTemplateFromString(str, filename, options) {
   var config = {};
 
   // config at the beginning of the file
-  str.replace(settings.config, function (m, conf) {
+  str.replace(settings.config, function(m, conf) {
     config = yaml.safeLoad(conf);
   });
 
   // strip comments
   if (settings.stripComment) {
-    str = str.replace(settings.comment, function (m, code, assign, value) {
+    str = str.replace(settings.comment, function(m, code, assign, value) {
       return '';
     });
   }
@@ -367,7 +367,7 @@ function builtTemplateFromString(str, filename, options) {
     sections.body = str;
   }
   else {
-    str.replace(settings.dot.define, function (m, code, assign, value) {
+    str.replace(settings.dot.define, function(m, code, assign, value) {
       sections[code] = value;
     });
   }
@@ -403,12 +403,12 @@ function render(filename, options, callback) {
     return renderSync(filename, options)
   }
 
-  getTemplate(filename, options, function (err, template) {
+  getTemplate(filename, options, function(err, template) {
     if (err) {
       return callback(err);
     }
 
-    template.render({model: options}, callback);
+    template.render({ model: options, }, callback);
   });
 }
 
@@ -419,7 +419,7 @@ function render(filename, options, callback) {
 */
 function renderSync(filename, options) {
   var template = getTemplate(filename, options);
-  return template.render({model: options});
+  return template.render({ model: options, });
 }
 
 /**
@@ -430,7 +430,7 @@ function renderSync(filename, options) {
 */
 function renderString(templateString, options, callback) {
   var template = builtTemplateFromString(templateString, '', options);
-  return template.render({model: options}, callback);
+  return template.render({ model: options, }, callback);
 }
 
 module.exports = {
