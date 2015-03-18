@@ -70,7 +70,7 @@ DotDef.prototype = {
       this.model
     );
 
-    return template.render({ model: this.model, isPartial: true, );
+    return template.render({ model: this.model, isPartial: true, } );
   }
 
 };
