@@ -148,6 +148,26 @@ describe('express-dot-engine', function() {
         });
     });
 
+    it('should allow to pass additional data to the partial', function(done) {
+      // prepare
+      mock({
+        'path/views': {
+          'partial.dot': 'test-partial [[=model.media]]',
+          'child.dot': 'test-child [[=partial(\'partial.dot\', { media: model.test, })]]',
+        },
+      });
+
+      // run
+      engine.__express(
+        'path/views/child.dot',
+        { test: 'test-model', },
+        function(err, result) {
+          should(err).not.be.ok;
+          should(result).equal('test-child test-partial test-model');
+          done();
+        });
+    });
+
   });
 
   //////////////////////////////////////////////////////////////////////////////
