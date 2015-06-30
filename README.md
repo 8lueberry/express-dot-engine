@@ -77,7 +77,7 @@ engine.settings.dot = {
   define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
   conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
   iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
-  varname: 'layout, model',
+  varname: 'layout, partial, locals, model',
   strip: false,
   append: true,
   selfcontained: false,
