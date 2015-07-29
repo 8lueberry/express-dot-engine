@@ -290,30 +290,55 @@ function getTemplate(filename, options, callback) {
 
   // sync
   if (!isAsync) {
-    return done(null, buildTemplateFromFile(filename, options));
+    return done(null, buildTemplate(filename, options));
   }
 
   // async
-  buildTemplateFromFile(filename, options, done);
+  buildTemplate(filename, options, done);
 }
 
+
 /**
-* Builds a template from a file
-* If callback is passed, it will be called asynchronously.
-* @param {String} filename The path to the template
-* @param {Object} options The options sent by express
-* @param {Function} callback (Optional) The async node style callback
-*/
-function buildTemplateFromFile(filename, options, callback) {
-  var isAsync = callback && typeof callback === 'function';
+ * Builds a template
+ * If callback is passed, it will be called asynchronously.
+ * @param {String} filename The path or the name to the template
+ * @param {Object} options The options sent by express
+ * @param {Function} callback (Optional) The async node style callback
+ */
+function buildTemplate(filename, options, callback) {
+  var isAsync = callback && typeof callback === 'function',
+      getTemplateContentFn = options.getTemplate  && typeof options.getTemplate === 'function' ? options.getTemplate : getTemplateContentFromFile;
 
   // sync
   if (!isAsync) {
     return builtTemplateFromString(
-      fs.readFileSync(filename, 'utf8'),
-      filename,
-      options
+        getTemplateContentFn(filename, options),
+        filename,
+        options
     );
+  }
+
+  // function to call when retrieved template content
+  function done(err, templateText) {
+    callback(err, builtTemplateFromString(templateText, filename, options));
+  }
+
+  getTemplateContentFn(filename, options, done);
+}
+
+/**
+ * Gets the template content from a file
+ * If callback is passed, it will be called asynchronously.
+ * @param {String} filename The path to the template
+ * @param {Object} options The options sent by express
+ * @param {Function} callback (Optional) The async node style callback
+ */
+function getTemplateContentFromFile(filename, options, callback) {
+  var isAsync = callback && typeof callback === 'function';
+
+  // sync
+  if (!isAsync) {
+    return fs.readFileSync(filename, 'utf8');
   }
 
   // async
@@ -324,7 +349,7 @@ function buildTemplateFromFile(filename, options, callback) {
     }
 
     try {
-      callback(null, builtTemplateFromString(str, filename, options));
+      callback(null, str);
     }
     catch (err) {
       callback(err);

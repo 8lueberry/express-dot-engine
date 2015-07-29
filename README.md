@@ -339,6 +339,28 @@ engine.renderString(
 ...
 ```
 
+## Custom template provider
+
+You can provide a custom template provider
+
+`server`
+
+```javascript
+
+function getTemplate(name, options, callback) {
+    var isAsync = callback && typeof callback === 'function',
+        template = '<div>custom template, you can store templates in the database</div>';
+    if(!isAsync){
+      return template;
+    }
+    callback(null, template);
+};
+
+app.get('/', function(req, res) {
+  res.render('helper/index', { getTemplate: getTemplate, });
+});
+
+```
 
 ## Caching
 

@@ -245,6 +245,47 @@ describe('express-dot-engine', function() {
   });
 
   //////////////////////////////////////////////////////////////////////////////
+  // TEMPLATE PROVIDER
+  //////////////////////////////////////////////////////////////////////////////
+  describe('render with template provider', function() {
+
+    var templatename = 'render.with.template.provider',
+        template = 'test-template [[= model.test ]]',
+        getTemplate = function(name, options, callback) {
+            var isAsync = callback && typeof callback === 'function';
+            if (name === templatename) {
+              if(!isAsync){
+                return template;
+              }
+              callback(null, template);
+            }
+        };
+
+    it('should work async', function(done) {
+      // run
+      engine.render(
+          templatename,
+          { getTemplate: getTemplate, test: 'test-model', },
+          function(err, result) {
+            should(err).not.be.ok;
+            should(result).equal('test-template test-model');
+            done();
+          });
+    });
+
+    it('should work sync', function() {
+      // run
+      var result = engine.render(
+          templatename,
+          { getTemplate: getTemplate, test: 'test-model', });
+
+      // result
+      should(result).equal('test-template test-model');
+    });
+
+  });
+
+  //////////////////////////////////////////////////////////////////////////////
   // CACHE
   //////////////////////////////////////////////////////////////////////////////
   describe('cache', function() {
