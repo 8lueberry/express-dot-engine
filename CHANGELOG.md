@@ -1,3 +1,6 @@
+# 1.0.7
+- Custom template provider (@mihaislobozeanu)
+
 # 1.0.5
 - Pass [[=layout]] to the partials
 
