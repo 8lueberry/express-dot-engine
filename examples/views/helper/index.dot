@@ -10,6 +10,10 @@
     helper method: [[# def.myHelperMethod('Hello as a parameter') ]] <br />
     helper in view: [[# def.myHelperInView ]]
 
+    [[~ [{ data: 'Hello as a loop 1', }, { data: 'Hello as a loop 2', }] : item]]
+      [[= model.myHelperMethod2(item.data) ]]
+    [[~]]
+
   </body>
 </html>
 

@@ -34,7 +34,7 @@ app.get('/helper', function(req, res) {
     return 'Hello from server method helper (parameter: ' + param + ', server model: ' + this.model.fromServer + ')';
   }
 
-  res.render('helper/index', { fromServer: 'Hello from server', });
+  res.render('helper/index', { fromServer: 'Hello from server', myHelperMethod2: function(param) { return 'Hello from server method helper (parameter: ' + param + ''; }, });
 });
 
 var server = app.listen(2015, function() {
