@@ -398,8 +398,10 @@ function builtTemplateFromString(str, filename, options) {
   }
 
   try {
+    var templateSettings = _.pick(options, ['settings']);
+    options.getTemplate && (templateSettings.getTemplate = options.getTemplate);
     return new Template({
-      express: _.pick(options, ['settings']),
+      express: templateSettings,
       config: config,
       sections: sections,
       dirname: path.dirname(filename),
