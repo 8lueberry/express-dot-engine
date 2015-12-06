@@ -366,38 +366,38 @@ function getTemplateContentFromFile(filename, options, callback) {
 */
 function builtTemplateFromString(str, filename, options) {
 
-  var config = {};
-
-  // config at the beginning of the file
-  str.replace(settings.config, function(m, conf) {
-    config = yaml.safeLoad(conf);
-  });
-
-  // strip comments
-  if (settings.stripComment) {
-    str = str.replace(settings.comment, function(m, code, assign, value) {
-      return '';
-    });
-  }
-
-  // strip whitespace
-  if (settings.stripWhitespace) {
-    settings.dot.strip = settings.stripWhitespace;
-  }
-
-  // layout sections
-  var sections = {};
-
-  if (!config.layout) {
-    sections.body = str;
-  }
-  else {
-    str.replace(settings.dot.define, function(m, code, assign, value) {
-      sections[code] = value;
-    });
-  }
-
   try {
+    var config = {};
+
+    // config at the beginning of the file
+    str.replace(settings.config, function(m, conf) {
+      config = yaml.safeLoad(conf);
+    });
+
+    // strip comments
+    if (settings.stripComment) {
+      str = str.replace(settings.comment, function(m, code, assign, value) {
+        return '';
+      });
+    }
+
+    // strip whitespace
+    if (settings.stripWhitespace) {
+      settings.dot.strip = settings.stripWhitespace;
+    }
+
+    // layout sections
+    var sections = {};
+
+    if (!config.layout) {
+      sections.body = str;
+    }
+    else {
+      str.replace(settings.dot.define, function(m, code, assign, value) {
+        sections[code] = value;
+      });
+    }
+
     var templateSettings = _.pick(options, ['settings']);
     options.getTemplate && (templateSettings.getTemplate = options.getTemplate);
     return new Template({
