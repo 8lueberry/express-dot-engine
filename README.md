@@ -51,6 +51,13 @@ app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'dot');
 ```
 
+To use a different extension for your templates, for example to get better syntax highlighting in your IDE, replace `'dot'` with your extension of choice. See express' [documentation](https://expressjs.com/en/guide/using-template-engines.html)
+```javascript
+app.engine('html', engine.__express);
+app.set('views', path.join(__dirname, './views'));
+app.set('view engine', 'html');
+```
+
 ## Settings
 
 By default, the engine uses `[[ ]]` instead of `{{ }}` on the backend. This allows the use of front-end templating libraries that already use `{{ }}`.
