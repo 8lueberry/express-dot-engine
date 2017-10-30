@@ -320,7 +320,10 @@ function buildTemplate(filename, options, callback) {
 
   // function to call when retrieved template content
   function done(err, templateText) {
-    callback(err, builtTemplateFromString(templateText, filename, options));
+    if (err) {
+      return callback(err);
+    }
+    callback(null, builtTemplateFromString(templateText, filename, options));
   }
 
   getTemplateContentFn(filename, options, done);
