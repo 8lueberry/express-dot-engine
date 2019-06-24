@@ -31,14 +31,14 @@
   },
   "engineStrict": true,
   "dependencies": {
-    "dot": "^1.0.3",
+    "dot": "^1.1.2",
     "js-yaml": "^3.2.7",
-    "lodash": "^3.5.0"
+    "lodash": "^4.17.11"
   },
   "optionalDependencies": {},
   "devDependencies": {
-    "mocha": "^2.2.1",
-    "mock-fs": "^2.5.0",
-    "should": "^5.2.0"
+    "mocha": "^6.1.4",
+    "mock-fs": "^4.10.1",
+    "should": "^13.2.3"
   }
 }
