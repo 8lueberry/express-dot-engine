@@ -33,7 +33,7 @@
   "dependencies": {
     "dot": "^1.0.3",
     "js-yaml": "^3.2.7",
-    "lodash": "^3.5.0"
+    "lodash": "^4.17.12"
   },
   "optionalDependencies": {},
   "devDependencies": {
