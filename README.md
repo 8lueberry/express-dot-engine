@@ -1,6 +1,8 @@
 # express-dot-engine
 
-[![GitHub version](https://badge.fury.io/gh/8lueberry%2Fexpress-dot-engine.svg)](http://badge.fury.io/gh/8lueberry%2Fexpress-dot-engine) [![npm version](https://badge.fury.io/js/express-dot-engine.svg)](http://badge.fury.io/js/express-dot-engine) [![Build Status](https://travis-ci.org/8lueberry/express-dot-engine.svg)](https://travis-ci.org/8lueberry/express-dot-engine)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/8lueberry/express-dot-engine)](https://github.com/8lueberry/express-dot-engine/releases)
+[![node](https://img.shields.io/node/v/express-dot-engine)](https://npmjs.com/package/express-dot-engine)
+[![Build Status](https://travis-ci.org/8lueberry/express-dot-engine.svg)](https://travis-ci.org/8lueberry/express-dot-engine)
 
 > Node.js engine using the ultra fast [doT](http://olado.github.io/doT/) templating with support for layouts, partials. It's friendly for front-end web libraries (Angular, Ember, Backbone...)
 
