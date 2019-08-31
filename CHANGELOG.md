@@ -1,3 +1,7 @@
+# 1.0.8
+- Handle render failure correctly (@maxiruani)
+- Use updated dependencies (@cjsturgess)
+
 # 1.0.7
 - Custom template provider (@mihaislobozeanu)
 
