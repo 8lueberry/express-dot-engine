@@ -18,12 +18,7 @@
   "contributors": [
     "CJ Sturgess <cj@sturgess.co> (https://sturgess.co/)"
   ],
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/8lueberry/express-dot-engine/blob/master/LICENSE"
-    }
-  ],
+  "license": "MIT",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
