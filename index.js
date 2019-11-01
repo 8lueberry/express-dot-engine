@@ -8,7 +8,7 @@ var yaml = require('js-yaml');
 * Engine settings
 */
 var settings = {
-  config: /^---([\s\S]+?)---/g,
+  config: /^\uFEFF?---([\s\S]+?)---/g,
   comment: /<!--([\s\S]+?)-->/g,
   header: '',
 
