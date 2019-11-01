@@ -83,13 +83,16 @@ engine.settings.dot = {
   interpolate: /\[\[=([\s\S]+?)\]\]/g,
   encode:      /\[\[!([\s\S]+?)\]\]/g,
   use:         /\[\[#([\s\S]+?)\]\]/g,
+  useParams: /(^|[^\w$])def(?:\.|\[[\'\"])([\w$\.]+)(?:[\'\"]\])?\s*\:\s*([\w$\.]+|\"[^\"]+\"|\'[^\']+\'|\[[^\]]+\])/g,
   define:      /\[\[##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\]\]/g,
+  defineParams: /^\s*([\w$]+):([\s\S]+)/,
   conditional: /\[\[\?(\?)?\s*([\s\S]*?)\s*\]\]/g,
   iterate:     /\[\[~\s*(?:\]\]|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\]\])/g,
   varname: 'layout, partial, locals, model',
   strip: false,
   append: true,
   selfcontained: false,
+  doNotSkipEncoded: false
 };
 ```
 
@@ -403,8 +406,7 @@ Open your browser to `http://localhost:2015`
 
 ## Roadmap
 
-- Html minification in prod
-- Automatically remove server-side comments
+- Move to ES6+
 
 ## License
 [MIT](LICENSE)
