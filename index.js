@@ -153,10 +153,25 @@ function Template(options) {
 Template.prototype.createPartialHelper = function(layout, model) {
   return function(partialPath) {
     var args = [].slice.call(arguments, 1);
-    var template = getTemplate(
-      path.join(this.options.dirname || this.options.express.settings.views, partialPath),
-      this.options.express
-    );
+    
+    var template = undefined;
+
+    if(this.options.express.settings['view cache']) {
+      const cached = cache.get(path.join(this.options.dirname || this.options.express.settings.views, partialPath));
+
+      if(cached) {
+        template = cached
+      }
+    }
+
+    if(!template) {
+      template = getTemplate(
+        path.join(this.options.dirname || this.options.express.settings.views, partialPath),
+        this.options.express
+      );
+
+      cache.set(path.join(this.options.dirname || this.options.express.settings.views, partialPath), template);
+    }
 
     if (args.length) {
       model = _.assign.apply(_, [
